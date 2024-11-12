@@ -1,8 +1,6 @@
 package items
 
 import (
-	"fmt"
-
 	"github.com/rhajizada/donezo-mini/internal/tui/styles"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -14,9 +12,6 @@ func (m *ItemMenuModel) ListItems() tea.Cmd {
 		items, err := m.Service.ListItems(m.ctx, m.Parent)
 		if err != nil {
 			return ErrorMsg{err}
-		}
-		if len(*items) == 0 {
-			return ErrorMsg{fmt.Errorf("no items available")}
 		}
 		return ListItemsMsg{
 			items,

@@ -16,8 +16,8 @@ type Keymap struct {
 func NewKeymap() *Keymap {
 	return &Keymap{
 		Back: key.NewBinding(
-			key.WithKeys("b"),
-			key.WithHelp("b", "back"),
+			key.WithKeys("backspace"),
+			key.WithHelp("backspace", "back"),
 		),
 		CreateItem: key.NewBinding(
 			key.WithKeys("a"),

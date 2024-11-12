@@ -129,7 +129,7 @@ func (m *AppModel) SelectBoard() (tea.Cmd, bool) {
 func (m *AppModel) Back() (tea.Cmd, bool) {
 	var cmd tea.Cmd
 	handled := false
-	if len(m.ViewStack) > 1 {
+	if len(m.ViewStack) > 0 {
 		{
 			blist, ok := m.ViewStack[len(m.ViewStack)-1].(boards.MenuModel)
 			if ok {
@@ -142,7 +142,6 @@ func (m *AppModel) Back() (tea.Cmd, bool) {
 			if ok {
 				if ilist.Context.State == items.DefaultState {
 					m.Pop()
-
 					handled = true
 				}
 			}
@@ -164,7 +163,7 @@ func (m *AppModel) HandleKeyInput(msg tea.KeyMsg) (tea.Cmd, bool) {
 		cmd, handled = m.PreviousBoard()
 	case tea.KeyEnter.String():
 		cmd, handled = m.SelectBoard()
-	case "b":
+	case tea.KeyBackspace.String():
 		cmd, handled = m.Back()
 	}
 	return cmd, handled

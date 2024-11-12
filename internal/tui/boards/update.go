@@ -1,8 +1,6 @@
 package boards
 
 import (
-	"fmt"
-
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -12,9 +10,6 @@ func (m *MenuModel) ListBoards() tea.Cmd {
 		boards, err := m.Client.ListBoards(m.ctx)
 		if err != nil {
 			return ErrorMsg{err}
-		}
-		if len(*boards) == 0 {
-			return ErrorMsg{fmt.Errorf("no boards available")}
 		}
 		return ListBoardsMsg{
 			boards,
