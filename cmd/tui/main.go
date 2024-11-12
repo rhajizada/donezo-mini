@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -21,13 +20,12 @@ import (
 func main() {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		err = fmt.Errorf("unable to determine user home directory: %v", err)
-		panic(err)
+		log.Panicf("unable to determine user home directory: %v", err)
 	}
 	donezoDir := filepath.Join(homeDir, ".donezo")
 	_, err = os.Stat(donezoDir)
 	if os.IsNotExist(err) {
-		os.Mkdir(donezoDir, 700)
+		os.Mkdir(donezoDir, 0700)
 	}
 
 	dbPath := filepath.Join(donezoDir, "data.db")
@@ -35,24 +33,24 @@ func main() {
 	// Load database
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
-		log.Panicf("Failed to open database %s: %v", dbPath, err)
+		log.Panicf("failed to open database %s: %v", dbPath, err)
 	}
 	defer db.Close()
 
 	// Ensure the migrations directory exists
 	migrationsDir := "data/sql/migrations"
 	if _, err := os.Stat(migrationsDir); os.IsNotExist(err) {
-		log.Panicf("Migrations directory does not exist: %s", migrationsDir)
+		log.Panicf("migrations directory does not exist: %s", migrationsDir)
 	}
 
 	// Set Goose dialect to SQLite
 	if err := goose.SetDialect("sqlite3"); err != nil {
-		log.Panicf("Failed to set Goose dialect: %v", err)
+		log.Panicf("failed to set Goose dialect: %v", err)
 	}
 
 	// Apply all up migrations
 	if err := goose.Up(db, migrationsDir); err != nil {
-		log.Panicf("Failed to apply migrations: %v", err)
+		log.Panicf("failed to apply migrations: %v", err)
 	}
 
 	r := repository.New(db)
@@ -63,7 +61,6 @@ func main() {
 	p := tea.NewProgram(m, tea.WithAltScreen())
 
 	if _, err := p.Run(); err != nil {
-		fmt.Println("Error running program:", err)
-		os.Exit(1)
+		log.Panicf("error running program: %v", err)
 	}
 }
