@@ -3,19 +3,22 @@ package main
 import (
 	"context"
 	"database/sql"
+	"embed"
 	"log"
 	"os"
 	"path/filepath"
 
-	"github.com/pressly/goose"
-	"github.com/rhajizada/donezo-mini/internal/tui/app"
-
+	"github.com/pressly/goose/v3"
 	"github.com/rhajizada/donezo-mini/internal/repository"
 	"github.com/rhajizada/donezo-mini/internal/service"
+	"github.com/rhajizada/donezo-mini/internal/tui/app"
 
 	tea "github.com/charmbracelet/bubbletea"
 	_ "github.com/mattn/go-sqlite3"
 )
+
+//go:embed data/sql/migrations/*.sql
+var migrations embed.FS
 
 func main() {
 	homeDir, err := os.UserHomeDir()
@@ -23,8 +26,7 @@ func main() {
 		log.Panicf("unable to determine user home directory: %v", err)
 	}
 	donezoDir := filepath.Join(homeDir, ".donezo")
-	_, err = os.Stat(donezoDir)
-	if os.IsNotExist(err) {
+	if _, err = os.Stat(donezoDir); os.IsNotExist(err) {
 		os.Mkdir(donezoDir, 0700)
 	}
 
@@ -37,19 +39,16 @@ func main() {
 	}
 	defer db.Close()
 
-	// Ensure the migrations directory exists
-	migrationsDir := "data/sql/migrations"
-	if _, err := os.Stat(migrationsDir); os.IsNotExist(err) {
-		log.Panicf("migrations directory does not exist: %s", migrationsDir)
-	}
-
 	// Set Goose dialect to SQLite
 	if err := goose.SetDialect("sqlite3"); err != nil {
 		log.Panicf("failed to set Goose dialect: %v", err)
 	}
 
+	// Set the embedded migrations as the base FS for Goose
+	goose.SetBaseFS(migrations)
+
 	// Apply all up migrations
-	if err := goose.Up(db, migrationsDir); err != nil {
+	if err := goose.Up(db, "data/sql/migrations"); err != nil {
 		log.Panicf("failed to apply migrations: %v", err)
 	}
 

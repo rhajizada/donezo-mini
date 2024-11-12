@@ -1,7 +1,7 @@
 .PHONY: build
 ## build: Compile the executables
 build:
-	@go build -o bin/donezo ./cmd/tui
+	@go build -o bin/donezo .
 
 
 
@@ -15,7 +15,7 @@ sqlc:
 .PHONY: run
 ## run: Build and run in development mode
 run:
-	@go run cmd/tui/main.go
+	@go run main.go
 
 
 
@@ -38,7 +38,7 @@ uninstall:
 .PHONY: clean
 ## clean: Clean project and previous builds
 clean:
-	@rm builds/*
+	@rm bin/*
 
 
 
