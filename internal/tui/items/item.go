@@ -7,20 +7,24 @@ import (
 
 // Item represents item in the list
 type Item struct {
-	Itm service.Item
+	Itm  service.Item
+	Tags []string
 }
 
 func NewList(items *[]service.Item) []list.Item {
 	l := make([]list.Item, len(*items))
+	defaultTags := []string{"alpha", "beta", "gamma"}
 	for i, item := range *items {
-		l[i] = Item{Itm: item}
+		l[i] = Item{Itm: item, Tags: defaultTags}
 	}
 	return l
 }
 
 func NewItem(item *service.Item) list.Item {
+	defaultTags := []string{"alpha", "beta", "gamma"}
 	return Item{
-		Itm: *item,
+		Itm:  *item,
+		Tags: defaultTags,
 	}
 }
 

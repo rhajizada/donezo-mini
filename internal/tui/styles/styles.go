@@ -14,4 +14,10 @@ var (
 
 	Item = lipgloss.NewStyle().
 		Padding(0, 0)
+
+	Tags = lipgloss.NewStyle().
+		AlignHorizontal(lipgloss.Center).
+		Bold(true).
+		Foreground(lipgloss.Color("#FAFAFA")).
+		Background(lipgloss.Color("#7D56F4"))
 )
