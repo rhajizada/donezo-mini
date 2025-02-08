@@ -7,8 +7,8 @@ import (
 
 	"github.com/rhajizada/donezo-mini/internal/tui/styles"
 
-	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/rhajizada/donezo-mini/internal/tui/list"
 )
 
 // Define custom styles

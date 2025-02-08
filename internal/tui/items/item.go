@@ -1,8 +1,10 @@
 package items
 
 import (
-	"github.com/charmbracelet/bubbles/list"
+	"strings"
+
 	"github.com/rhajizada/donezo-mini/internal/service"
+	"github.com/rhajizada/donezo-mini/internal/tui/list"
 )
 
 // Item represents item in the list
@@ -30,4 +32,5 @@ func NewItem(item *service.Item) list.Item {
 
 func (i Item) Title() string       { return i.Itm.Title }
 func (i Item) Description() string { return i.Itm.Description }
+func (i Item) Footer() string      { return strings.Join(i.Tags, ", ") }
 func (i Item) FilterValue() string { return i.Itm.Title }

@@ -3,10 +3,10 @@ package items
 import (
 	"context"
 
-	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/rhajizada/donezo-mini/internal/service"
+	"github.com/rhajizada/donezo-mini/internal/tui/list"
 )
 
 type ItemMenuModel struct {
