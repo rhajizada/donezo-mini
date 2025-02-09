@@ -1,10 +1,14 @@
 package items
 
 import (
+	"strings"
+
 	"github.com/rhajizada/donezo-mini/internal/tui/styles"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
+
+const TagsSeparator = ", "
 
 // ListItems fetches items ine the selected board.
 func (m *ItemMenuModel) ListItems() tea.Cmd {
@@ -38,26 +42,31 @@ func (m *ItemMenuModel) InitCreateItem() tea.Cmd {
 	return nil
 }
 
-// RenameBoard renames selected board
+// RenameItem renames selected item
 func (m *ItemMenuModel) RenameItem() tea.Cmd {
 	return func() tea.Msg {
 		selected := m.List.SelectedItem().(Item)
 		selected.Itm.Title = m.Context.Title
 		selected.Itm.Description = m.Context.Desc
-		board, err := m.Service.UpdateItem(m.ctx, &selected.Itm)
+		item, err := m.Service.UpdateItem(m.ctx, &selected.Itm)
 		return RenameItemMsg{
-			board,
+			item,
 			err,
 		}
 	}
 }
 
-// DeleteBoard deletes current selected board
-func (m *ItemMenuModel) DeleteItem() tea.Cmd {
+// UpdateTags updates item tags
+func (m *ItemMenuModel) UpdateTags() tea.Cmd {
 	return func() tea.Msg {
 		selected := m.List.SelectedItem().(Item)
-		err := m.Service.DeleteItem(m.ctx, &selected.Itm)
-		return DeleteItemMsg{Error: err, Item: &selected.Itm}
+		tags := strings.Split(m.Context.Title, TagsSeparator)
+		selected.Itm.Tags = tags
+		item, err := m.Service.UpdateItem(m.ctx, &selected.Itm)
+		return UpdateTagsMsg{
+			item,
+			err,
+		}
 	}
 }
 
@@ -73,6 +82,26 @@ func (m *ItemMenuModel) InitRenameItem() tea.Cmd {
 	m.Input.SetValue(selected.Itm.Title)
 	m.Input.Focus()
 	return nil
+}
+
+// InitUpdateTags initiaizes tag updates
+func (m *ItemMenuModel) InitUpdateTags() tea.Cmd {
+	m.Context.State = CreateItemNameState
+	m.Context.State = UpdateTagsState
+	m.Input.Placeholder = "Enter comma-separated list of tags"
+	selected := m.List.SelectedItem().(Item)
+	m.Input.SetValue(strings.Join(selected.Itm.Tags, TagsSeparator))
+	m.Input.Focus()
+	return nil
+}
+
+// DeleteBoard deletes current selected board
+func (m *ItemMenuModel) DeleteItem() tea.Cmd {
+	return func() tea.Msg {
+		selected := m.List.SelectedItem().(Item)
+		err := m.Service.DeleteItem(m.ctx, &selected.Itm)
+		return DeleteItemMsg{Error: err, Item: &selected.Itm}
+	}
 }
 
 func (m ItemMenuModel) ToggleComplete() tea.Cmd {
@@ -127,6 +156,10 @@ func (m ItemMenuModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case RenameItemMsg:
 		cmd := m.HandleRenameItem(msg)
+		cmds = append(cmds, cmd)
+
+	case UpdateTagsMsg:
+		cmd := m.HandleUpdateTags(msg)
 		cmds = append(cmds, cmd)
 
 	case ToggleItemMsg:

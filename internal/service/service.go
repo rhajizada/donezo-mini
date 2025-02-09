@@ -60,7 +60,14 @@ func (s *Service) ListItems(ctx context.Context, board *Board) (*[]Item, error) 
 	}
 	items := make([]Item, len(data))
 	for i, v := range data {
-		items[i] = Item{v}
+		tags, err := s.Repo.ListTagsByItemID(ctx, v.ID)
+		if err != nil {
+			tags = make([]string, 0)
+		}
+		items[i] = Item{
+			v,
+			tags,
+		}
 	}
 	return &items, nil
 }
@@ -76,7 +83,10 @@ func (s *Service) CreateItem(ctx context.Context, board *Board, title string, de
 	if err != nil {
 		return nil, err
 	}
-	return &Item{data}, nil
+	return &Item{
+		data,
+		make([]string, 0),
+	}, nil
 }
 
 func (s *Service) UpdateItem(ctx context.Context, item *Item) (*Item, error) {
@@ -91,7 +101,54 @@ func (s *Service) UpdateItem(ctx context.Context, item *Item) (*Item, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Item{data}, nil
+
+	// Fetch existing tags from the database
+	existingTags, err := s.Repo.ListTagsByItemID(ctx, data.ID)
+	if err != nil {
+		existingTags = make([]string, 0)
+	}
+
+	// Create maps for efficient lookup
+	existingTagsMap := make(map[string]struct{}, len(existingTags))
+	for _, tag := range existingTags {
+		existingTagsMap[tag] = struct{}{}
+	}
+
+	newTagsMap := make(map[string]struct{}, len(item.Tags))
+	for _, tag := range item.Tags {
+		newTagsMap[tag] = struct{}{}
+	}
+
+	// Remove tags that are not in the updated item
+	for _, tag := range existingTags {
+		if _, found := newTagsMap[tag]; !found {
+			err := s.Repo.RemoveTagFromItemByID(ctx, repository.RemoveTagFromItemByIDParams{
+				ItemID: data.ID,
+				Tag:    tag,
+			})
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	// Add new tags that are missing in the database
+	for _, tag := range item.Tags {
+		if _, found := existingTagsMap[tag]; !found {
+			err := s.Repo.AddTagToItemByID(ctx, repository.AddTagToItemByIDParams{
+				ItemID: data.ID,
+				Tag:    tag,
+			})
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	return &Item{
+		data,
+		item.Tags, // Return the updated tags
+	}, nil
 }
 
 func (s *Service) DeleteItem(ctx context.Context, item *Item) error {

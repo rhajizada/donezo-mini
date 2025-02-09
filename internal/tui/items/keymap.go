@@ -7,6 +7,7 @@ type Keymap struct {
 	CreateItem     key.Binding
 	DeleteItem     key.Binding
 	RenameItem     key.Binding
+	UpdateTags     key.Binding
 	RefreshList    key.Binding
 	ToggleComplete key.Binding
 	NextBoard      key.Binding
@@ -30,6 +31,10 @@ func NewKeymap() *Keymap {
 		RenameItem: key.NewBinding(
 			key.WithKeys("r"),
 			key.WithHelp("r", "rename item"),
+		),
+		UpdateTags: key.NewBinding(
+			key.WithKeys("t"),
+			key.WithHelp("t", "update tags"),
 		),
 		RefreshList: key.NewBinding(
 			key.WithKeys("R"),
@@ -63,6 +68,7 @@ func (km Keymap) FullHelp() []key.Binding {
 	bindings = append(bindings, km.CreateItem)
 	bindings = append(bindings, km.DeleteItem)
 	bindings = append(bindings, km.RenameItem)
+	bindings = append(bindings, km.UpdateTags)
 	bindings = append(bindings, km.RefreshList)
 	bindings = append(bindings, km.ToggleComplete)
 	bindings = append(bindings, km.NextBoard)

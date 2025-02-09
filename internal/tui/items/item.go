@@ -9,28 +9,33 @@ import (
 
 // Item represents item in the list
 type Item struct {
-	Itm  service.Item
-	Tags []string
+	Itm service.Item
 }
 
 func NewList(items *[]service.Item) []list.Item {
 	l := make([]list.Item, len(*items))
-	defaultTags := []string{"alpha", "beta", "gamma"}
 	for i, item := range *items {
-		l[i] = Item{Itm: item, Tags: defaultTags}
+		l[i] = Item{Itm: item}
 	}
 	return l
 }
 
 func NewItem(item *service.Item) list.Item {
-	defaultTags := []string{"alpha", "beta", "gamma"}
 	return Item{
-		Itm:  *item,
-		Tags: defaultTags,
+		Itm: *item,
 	}
 }
 
 func (i Item) Title() string       { return i.Itm.Title }
 func (i Item) Description() string { return i.Itm.Description }
-func (i Item) Footer() string      { return strings.Join(i.Tags, ", ") }
+func (i Item) Footer() string {
+	var message string
+	if len(i.Itm.Tags) > 0 {
+		message += "Tags: "
+		message += strings.Join(i.Itm.Tags, ", ")
+	} else {
+		message += "No tags"
+	}
+	return message
+}
 func (i Item) FilterValue() string { return i.Itm.Title }

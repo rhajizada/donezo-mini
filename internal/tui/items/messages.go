@@ -20,6 +20,11 @@ type RenameItemMsg struct {
 	Error error
 }
 
+type UpdateTagsMsg struct {
+	Item  *service.Item
+	Error error
+}
+
 type ToggleItemMsg struct {
 	Item  *service.Item
 	Error error

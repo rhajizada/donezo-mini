@@ -8,6 +8,7 @@ const (
 	CreateItemDescState
 	RenameItemNameState
 	RenameItemDescState
+	UpdateTagsState
 )
 
 type InputContext struct {

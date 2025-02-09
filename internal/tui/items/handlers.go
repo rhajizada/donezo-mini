@@ -76,6 +76,23 @@ func (m *ItemMenuModel) HandleRenameItem(msg RenameItemMsg) tea.Cmd {
 	}
 }
 
+func (m *ItemMenuModel) HandleUpdateTags(msg UpdateTagsMsg) tea.Cmd {
+	if msg.Error != nil {
+		return m.List.NewStatusMessage(
+			styles.ErrorMessage.Render(
+				fmt.Sprintf("failed updating tags: %v", msg.Error),
+			),
+		)
+	} else {
+		m.List.SetItem(m.List.Index(), NewItem(msg.Item))
+		return m.List.NewStatusMessage(
+			styles.StatusMessage.Render(
+				fmt.Sprintf("updated item \"%s\" tags", msg.Item.Title),
+			),
+		)
+	}
+}
+
 func (m *ItemMenuModel) HandleToggleItem(msg ToggleItemMsg) tea.Cmd {
 	if msg.Error != nil {
 		return m.List.NewStatusMessage(
@@ -139,6 +156,11 @@ func (m *ItemMenuModel) HandleInputState(msg tea.Msg) (textinput.Model, []tea.Cm
 				m.Context.State = DefaultState
 				m.Input.Blur()
 				cmds = append(cmds, m.RenameItem())
+			case UpdateTagsState:
+				m.Context.Title = m.Input.Value()
+				m.Context.State = DefaultState
+				m.Input.Blur()
+				cmds = append(cmds, m.UpdateTags())
 			}
 		case tea.KeyEsc:
 			// Cancel the current operation
@@ -160,6 +182,8 @@ func (m *ItemMenuModel) HandleKeyInput(msg tea.KeyMsg) tea.Cmd {
 		cmd = m.DeleteItem()
 	case key.Matches(msg, m.Keys.RenameItem):
 		cmd = m.InitRenameItem()
+	case key.Matches(msg, m.Keys.UpdateTags):
+		cmd = m.InitUpdateTags()
 	case key.Matches(msg, m.Keys.ToggleComplete):
 		cmd = m.ToggleComplete()
 	case key.Matches(msg, m.Keys.RefreshList):
