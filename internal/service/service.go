@@ -154,3 +154,15 @@ func (s *Service) UpdateItem(ctx context.Context, item *Item) (*Item, error) {
 func (s *Service) DeleteItem(ctx context.Context, item *Item) error {
 	return s.Repo.DeleteItemByID(ctx, item.ID)
 }
+
+func (s *Service) ListTags(ctx context.Context) ([]string, error) {
+	return s.Repo.ListTags(ctx)
+}
+
+func (s *Service) DeleteTag(ctx context.Context, tag string) error {
+	return s.Repo.DeleteTag(ctx, tag)
+}
+
+func (s *Service) CountItemsByTag(ctx context.Context, tag string) (int64, error) {
+	return s.Repo.CountItemsByTag(ctx, tag)
+}

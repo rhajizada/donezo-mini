@@ -25,6 +25,20 @@ func (q *Queries) AddTagToItemByID(ctx context.Context, arg AddTagToItemByIDPara
 	return err
 }
 
+const countItemsByTag = `-- name: CountItemsByTag :one
+SELECT COUNT(*)
+FROM items i
+JOIN tags t ON i.id = t.item_id
+WHERE t.tag = ?
+`
+
+func (q *Queries) CountItemsByTag(ctx context.Context, tag string) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countItemsByTag, tag)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const deleteTag = `-- name: DeleteTag :exec
 DELETE FROM tags WHERE tag = ?
 `

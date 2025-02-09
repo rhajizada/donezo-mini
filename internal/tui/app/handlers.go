@@ -5,6 +5,7 @@ import (
 
 	"github.com/rhajizada/donezo-mini/internal/tui/boards"
 	"github.com/rhajizada/donezo-mini/internal/tui/items"
+	"github.com/rhajizada/donezo-mini/internal/tui/tags"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -156,15 +157,52 @@ func (m *AppModel) Back() (tea.Cmd, bool) {
 func (m *AppModel) HandleKeyInput(msg tea.KeyMsg) (tea.Cmd, bool) {
 	var cmd tea.Cmd
 	handled := false
-	switch msg.String() {
-	case tea.KeyTab.String():
-		cmd, handled = m.NextBoard()
-	case tea.KeyShiftTab.String():
-		cmd, handled = m.PreviousBoard()
-	case tea.KeyEnter.String():
-		cmd, handled = m.SelectBoard()
-	case tea.KeyBackspace.String():
-		cmd, handled = m.Back()
+
+	// When only the main menu is active (no items view)
+	if len(m.ViewStack) == 1 {
+		switch msg.String() {
+		case tea.KeyTab.String(), tea.KeyShiftTab.String():
+			// Toggle between boards and tags
+			cmd = m.ToggleMainMenu()
+			handled = true
+		case tea.KeyEnter.String():
+			// Only allow board selection when in board view.
+			if m.MenuType == MenuBoards {
+				cmd, handled = m.SelectBoard()
+			}
+		case tea.KeyBackspace.String():
+			cmd, handled = m.Back()
+		}
+	} else {
+		// When the items view is active, keep previous behavior.
+		switch msg.String() {
+		case tea.KeyTab.String():
+			cmd, handled = m.NextBoard()
+		case tea.KeyShiftTab.String():
+			cmd, handled = m.PreviousBoard()
+		case tea.KeyEnter.String():
+			cmd, handled = m.SelectBoard()
+		case tea.KeyBackspace.String():
+			cmd, handled = m.Back()
+		}
 	}
 	return cmd, handled
+}
+
+func (m *AppModel) ToggleMainMenu() tea.Cmd {
+	var newMain tea.Model
+	if m.MenuType == MenuBoards {
+		m.MenuType = MenuTags
+		newMain = tags.NewModel(m.ctx, m.Service)
+	} else {
+		m.MenuType = MenuBoards
+		newMain = boards.NewModel(m.ctx, m.Service)
+	}
+	m.ViewStack[0] = newMain
+	initCmd := newMain.Init()
+	// Force the new model to update its layout if we already have a window size.
+	if m.LastWindowSize != nil {
+		return tea.Batch(initCmd, m.ApplyWindowSizeToCurrent(*m.LastWindowSize))
+	}
+	return initCmd
 }

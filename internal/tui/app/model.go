@@ -14,6 +14,7 @@ type AppModel struct {
 	Service        *service.Service
 	ViewStack      []tea.Model
 	LastWindowSize *tea.WindowSizeMsg // Store the last known WindowSizeMsg
+	MenuType       MenuType           // NEW: tracks whether main view is boards or tags
 }
 
 func NewModel(ctx context.Context, service *service.Service) AppModel {
@@ -22,7 +23,8 @@ func NewModel(ctx context.Context, service *service.Service) AppModel {
 		ctx:            ctx,
 		Service:        service,
 		ViewStack:      []tea.Model{boardMenu},
-		LastWindowSize: nil, // Initialize without a WindowSizeMsg
+		LastWindowSize: nil,
+		MenuType:       MenuBoards, // initially showing boards
 	}
 }
 

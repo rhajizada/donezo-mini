@@ -10,6 +10,7 @@ import (
 
 type Querier interface {
 	AddTagToItemByID(ctx context.Context, arg AddTagToItemByIDParams) error
+	CountItemsByTag(ctx context.Context, tag string) (int64, error)
 	CreateBoard(ctx context.Context, name string) (Board, error)
 	CreateItem(ctx context.Context, arg CreateItemParams) (Item, error)
 	DeleteBoardByID(ctx context.Context, id int64) error

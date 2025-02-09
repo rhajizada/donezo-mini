@@ -13,6 +13,12 @@ JOIN tags t ON i.id = t.item_id
 WHERE t.tag = ?
 ORDER BY i.created_at;
 
+-- name: CountItemsByTag :one
+SELECT COUNT(*)
+FROM items i
+JOIN tags t ON i.id = t.item_id
+WHERE t.tag = ?;
+
 -- name: AddTagToItemByID :exec
 INSERT INTO tags (item_id, tag)
 VALUES (?, ?)
