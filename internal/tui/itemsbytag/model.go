@@ -1,4 +1,4 @@
-package items
+package itemsbytag
 
 import (
 	"context"
@@ -7,11 +7,12 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/rhajizada/donezo-mini/internal/service"
 	"github.com/rhajizada/donezo-mini/internal/tui/list"
+	"github.com/rhajizada/donezo-mini/internal/tui/tags"
 )
 
-type ItemMenuModel struct {
+type MenuModel struct {
 	ctx     context.Context
-	Parent  *service.Board
+	Parent  *tags.MenuModel
 	List    list.Model
 	Input   textinput.Model
 	Keys    *Keymap
@@ -19,27 +20,28 @@ type ItemMenuModel struct {
 	Service *service.Service
 }
 
-func (m ItemMenuModel) Init() tea.Cmd {
+func (m MenuModel) Init() tea.Cmd {
 	return m.ListItems()
 }
 
-func NewModel(ctx context.Context, service *service.Service, board *service.Board) ItemMenuModel {
+func NewModel(ctx context.Context, service *service.Service, parent *tags.MenuModel) MenuModel {
 	list := list.New(
 		[]list.Item{},
 		NewDelegate(),
 		0,
 		0,
 	)
+	parentItem := parent.List.SelectedItem().(tags.Item)
 	input := textinput.New()
 	keymap := NewKeymap()
 	inputContext := NewInputContext()
-	list.Title = board.Name
+	list.Title = parentItem.Tag
 	list.AdditionalShortHelpKeys = keymap.ShortHelp
 	list.AdditionalFullHelpKeys = keymap.FullHelp
 
-	return ItemMenuModel{
+	return MenuModel{
 		ctx:     ctx,
-		Parent:  board,
+		Parent:  parent,
 		List:    list,
 		Input:   input,
 		Keys:    keymap,

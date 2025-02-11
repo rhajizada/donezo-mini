@@ -1,10 +1,9 @@
-package items
+package itemsbytag
 
 import "github.com/charmbracelet/bubbles/key"
 
 type Keymap struct {
 	Back           key.Binding
-	CreateItem     key.Binding
 	DeleteItem     key.Binding
 	RenameItem     key.Binding
 	UpdateTags     key.Binding
@@ -19,10 +18,6 @@ func NewKeymap() *Keymap {
 		Back: key.NewBinding(
 			key.WithKeys("backspace"),
 			key.WithHelp("backspace", "back"),
-		),
-		CreateItem: key.NewBinding(
-			key.WithKeys("a"),
-			key.WithHelp("a", "create item"),
 		),
 		DeleteItem: key.NewBinding(
 			key.WithKeys("d"),
@@ -58,14 +53,13 @@ func NewKeymap() *Keymap {
 func (km Keymap) ShortHelp() []key.Binding {
 	bindings := []key.Binding{}
 	bindings = append(bindings, km.Back)
-	bindings = append(bindings, km.CreateItem)
+	bindings = append(bindings, km.UpdateTags)
 	return bindings
 }
 
 func (km Keymap) FullHelp() []key.Binding {
 	bindings := []key.Binding{}
 	bindings = append(bindings, km.Back)
-	bindings = append(bindings, km.CreateItem)
 	bindings = append(bindings, km.DeleteItem)
 	bindings = append(bindings, km.RenameItem)
 	bindings = append(bindings, km.UpdateTags)

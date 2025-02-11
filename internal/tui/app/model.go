@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/rhajizada/donezo-mini/internal/tui/boards"
+	"github.com/rhajizada/donezo-mini/internal/tui/tags"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/rhajizada/donezo-mini/internal/service"
@@ -33,12 +34,21 @@ func (m AppModel) Init() tea.Cmd {
 	return m.ViewStack[len(m.ViewStack)-1].Init()
 }
 
-func (m *AppModel) GetCurrentBoard() *service.Board {
+func (m *AppModel) GetCurrentBoard() *boards.MenuModel {
 	// Retrieve the currently selected board from the board menu
 	if boardMenu, ok := m.ViewStack[0].(boards.MenuModel); ok {
-		if selected, ok := boardMenu.List.SelectedItem().(boards.Item); ok {
-			return &selected.Board
+		if _, ok := boardMenu.List.SelectedItem().(boards.Item); ok {
+			return &boardMenu
 		}
 	}
 	return nil
+}
+
+func (m *AppModel) GetCurrentTag() string {
+	if tagMenu, ok := m.ViewStack[0].(tags.MenuModel); ok {
+		if selected, ok := tagMenu.List.SelectedItem().(tags.Item); ok {
+			return selected.Tag
+		}
+	}
+	return ""
 }

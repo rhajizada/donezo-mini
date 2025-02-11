@@ -1,4 +1,4 @@
-package items
+package itemsbyboard
 
 import (
 	"fmt"
@@ -11,14 +11,14 @@ import (
 )
 
 // HandleWindowSize processes window size messages.
-func (m *ItemMenuModel) HandleWindowSize(msg tea.WindowSizeMsg) tea.Cmd {
+func (m *MenuModel) HandleWindowSize(msg tea.WindowSizeMsg) tea.Cmd {
 	h, v := styles.App.GetFrameSize()
 	m.List.SetSize(msg.Width-h, msg.Height-v)
 	return nil
 }
 
 // HandleError  processes errors and displays error messages
-func (m *ItemMenuModel) HandleError(msg ErrorMsg) tea.Cmd {
+func (m *MenuModel) HandleError(msg ErrorMsg) tea.Cmd {
 	formattedMsg := fmt.Sprintf("error: %v", msg.Error)
 	return m.List.NewStatusMessage(
 		styles.ErrorMessage.Render(formattedMsg),
@@ -26,7 +26,7 @@ func (m *ItemMenuModel) HandleError(msg ErrorMsg) tea.Cmd {
 }
 
 // HandleCreateItem handles CreateItemMsg
-func (m *ItemMenuModel) HandleCreateItem(msg CreateItemMsg) tea.Cmd {
+func (m *MenuModel) HandleCreateItem(msg CreateItemMsg) tea.Cmd {
 	if msg.Error != nil {
 		return m.List.NewStatusMessage(
 			styles.ErrorMessage.Render(
@@ -43,7 +43,7 @@ func (m *ItemMenuModel) HandleCreateItem(msg CreateItemMsg) tea.Cmd {
 }
 
 // HandleDeleteItem handles DeleteItemMsg
-func (m *ItemMenuModel) HandleDeleteItem(msg DeleteItemMsg) tea.Cmd {
+func (m *MenuModel) HandleDeleteItem(msg DeleteItemMsg) tea.Cmd {
 	if msg.Error != nil {
 		return m.List.NewStatusMessage(
 			styles.ErrorMessage.Render(
@@ -59,7 +59,7 @@ func (m *ItemMenuModel) HandleDeleteItem(msg DeleteItemMsg) tea.Cmd {
 	}
 }
 
-func (m *ItemMenuModel) HandleRenameItem(msg RenameItemMsg) tea.Cmd {
+func (m *MenuModel) HandleRenameItem(msg RenameItemMsg) tea.Cmd {
 	if msg.Error != nil {
 		return m.List.NewStatusMessage(
 			styles.ErrorMessage.Render(
@@ -76,7 +76,7 @@ func (m *ItemMenuModel) HandleRenameItem(msg RenameItemMsg) tea.Cmd {
 	}
 }
 
-func (m *ItemMenuModel) HandleUpdateTags(msg UpdateTagsMsg) tea.Cmd {
+func (m *MenuModel) HandleUpdateTags(msg UpdateTagsMsg) tea.Cmd {
 	if msg.Error != nil {
 		return m.List.NewStatusMessage(
 			styles.ErrorMessage.Render(
@@ -93,7 +93,7 @@ func (m *ItemMenuModel) HandleUpdateTags(msg UpdateTagsMsg) tea.Cmd {
 	}
 }
 
-func (m *ItemMenuModel) HandleToggleItem(msg ToggleItemMsg) tea.Cmd {
+func (m *MenuModel) HandleToggleItem(msg ToggleItemMsg) tea.Cmd {
 	if msg.Error != nil {
 		return m.List.NewStatusMessage(
 			styles.ErrorMessage.Render(
@@ -118,7 +118,7 @@ func (m *ItemMenuModel) HandleToggleItem(msg ToggleItemMsg) tea.Cmd {
 }
 
 // HandleInputState handles CreateItemState and RenameItemState states
-func (m *ItemMenuModel) HandleInputState(msg tea.Msg) (textinput.Model, []tea.Cmd) {
+func (m *MenuModel) HandleInputState(msg tea.Msg) (textinput.Model, []tea.Cmd) {
 	var cmds []tea.Cmd
 	var cmd tea.Cmd
 
@@ -173,7 +173,7 @@ func (m *ItemMenuModel) HandleInputState(msg tea.Msg) (textinput.Model, []tea.Cm
 }
 
 // HandleKeyInput processes key inputs not handles by list.Model
-func (m *ItemMenuModel) HandleKeyInput(msg tea.KeyMsg) tea.Cmd {
+func (m *MenuModel) HandleKeyInput(msg tea.KeyMsg) tea.Cmd {
 	var cmd tea.Cmd
 	switch {
 	case key.Matches(msg, m.Keys.CreateItem):

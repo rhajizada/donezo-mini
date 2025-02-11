@@ -1,8 +1,9 @@
-package items
+package itemsbyboard
 
 import (
 	"strings"
 
+	"github.com/rhajizada/donezo-mini/internal/tui/boards"
 	"github.com/rhajizada/donezo-mini/internal/tui/styles"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -11,9 +12,10 @@ import (
 const TagsSeparator = ", "
 
 // ListItems fetches items ine the selected board.
-func (m *ItemMenuModel) ListItems() tea.Cmd {
+func (m *MenuModel) ListItems() tea.Cmd {
 	return func() tea.Msg {
-		items, err := m.Service.ListItems(m.ctx, m.Parent)
+		parentItem := m.Parent.List.SelectedItem().(boards.Item)
+		items, err := m.Service.ListItems(m.ctx, &parentItem.Board)
 		if err != nil {
 			return ErrorMsg{err}
 		}
@@ -24,9 +26,10 @@ func (m *ItemMenuModel) ListItems() tea.Cmd {
 }
 
 // CreateItem creates a new item
-func (m *ItemMenuModel) CreateItem() tea.Cmd {
+func (m *MenuModel) CreateItem() tea.Cmd {
 	return func() tea.Msg {
-		item, err := m.Service.CreateItem(m.ctx, m.Parent, m.Context.Title, m.Context.Desc)
+		parentItem := m.Parent.List.SelectedItem().(boards.Item)
+		item, err := m.Service.CreateItem(m.ctx, &parentItem.Board, m.Context.Title, m.Context.Desc)
 		return CreateItemMsg{
 			item,
 			err,
@@ -34,7 +37,7 @@ func (m *ItemMenuModel) CreateItem() tea.Cmd {
 	}
 }
 
-func (m *ItemMenuModel) InitCreateItem() tea.Cmd {
+func (m *MenuModel) InitCreateItem() tea.Cmd {
 	m.Context.State = CreateItemNameState
 	m.Input.Placeholder = "Enter item name"
 	m.Input.SetValue("")
@@ -43,7 +46,7 @@ func (m *ItemMenuModel) InitCreateItem() tea.Cmd {
 }
 
 // RenameItem renames selected item
-func (m *ItemMenuModel) RenameItem() tea.Cmd {
+func (m *MenuModel) RenameItem() tea.Cmd {
 	return func() tea.Msg {
 		selected := m.List.SelectedItem().(Item)
 		selected.Itm.Title = m.Context.Title
@@ -57,7 +60,7 @@ func (m *ItemMenuModel) RenameItem() tea.Cmd {
 }
 
 // UpdateTags updates item tags
-func (m *ItemMenuModel) UpdateTags() tea.Cmd {
+func (m *MenuModel) UpdateTags() tea.Cmd {
 	return func() tea.Msg {
 		selected := m.List.SelectedItem().(Item)
 		tags := strings.Split(m.Context.Title, TagsSeparator)
@@ -71,7 +74,7 @@ func (m *ItemMenuModel) UpdateTags() tea.Cmd {
 }
 
 // initiateRename starts the renaming process for the selected item.
-func (m *ItemMenuModel) InitRenameItem() tea.Cmd {
+func (m *MenuModel) InitRenameItem() tea.Cmd {
 	if len(m.List.Items()) == 0 {
 		return m.List.NewStatusMessage(
 			styles.StatusMessage.Render("no item selected"))
@@ -85,8 +88,7 @@ func (m *ItemMenuModel) InitRenameItem() tea.Cmd {
 }
 
 // InitUpdateTags initiaizes tag updates
-func (m *ItemMenuModel) InitUpdateTags() tea.Cmd {
-	m.Context.State = CreateItemNameState
+func (m *MenuModel) InitUpdateTags() tea.Cmd {
 	m.Context.State = UpdateTagsState
 	m.Input.Placeholder = "Enter comma-separated list of tags"
 	selected := m.List.SelectedItem().(Item)
@@ -96,7 +98,7 @@ func (m *ItemMenuModel) InitUpdateTags() tea.Cmd {
 }
 
 // DeleteBoard deletes current selected board
-func (m *ItemMenuModel) DeleteItem() tea.Cmd {
+func (m *MenuModel) DeleteItem() tea.Cmd {
 	return func() tea.Msg {
 		selected := m.List.SelectedItem().(Item)
 		err := m.Service.DeleteItem(m.ctx, &selected.Itm)
@@ -104,7 +106,7 @@ func (m *ItemMenuModel) DeleteItem() tea.Cmd {
 	}
 }
 
-func (m ItemMenuModel) ToggleComplete() tea.Cmd {
+func (m MenuModel) ToggleComplete() tea.Cmd {
 	if len(m.List.Items()) == 0 {
 		return m.List.NewStatusMessage(
 			styles.ErrorMessage.Render("no item selected"))
@@ -120,7 +122,7 @@ func (m ItemMenuModel) ToggleComplete() tea.Cmd {
 	}
 }
 
-func (m ItemMenuModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m MenuModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 
 	if m.Context.State != DefaultState {

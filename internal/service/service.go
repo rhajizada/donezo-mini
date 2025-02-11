@@ -53,6 +53,14 @@ func (s *Service) DeleteBoard(ctx context.Context, board *Board) error {
 	return s.Repo.DeleteBoardByID(ctx, board.ID)
 }
 
+func (s *Service) listTagsByItemID(ctx context.Context, itemID int64) []string {
+	tags, err := s.Repo.ListTagsByItemID(ctx, itemID)
+	if err != nil {
+		tags = make([]string, 0)
+	}
+	return tags
+}
+
 func (s *Service) ListItems(ctx context.Context, board *Board) (*[]Item, error) {
 	data, err := s.Repo.ListItemsByBoardID(ctx, board.ID)
 	if err != nil {
@@ -60,10 +68,23 @@ func (s *Service) ListItems(ctx context.Context, board *Board) (*[]Item, error) 
 	}
 	items := make([]Item, len(data))
 	for i, v := range data {
-		tags, err := s.Repo.ListTagsByItemID(ctx, v.ID)
-		if err != nil {
-			tags = make([]string, 0)
+		tags := s.listTagsByItemID(ctx, v.ID)
+		items[i] = Item{
+			v,
+			tags,
 		}
+	}
+	return &items, nil
+}
+
+func (s *Service) ListItemsByTag(ctx context.Context, tag string) (*[]Item, error) {
+	data, err := s.Repo.ListItemsByTag(ctx, tag)
+	if err != nil {
+		return nil, err
+	}
+	items := make([]Item, len(data))
+	for i, v := range data {
+		tags := s.listTagsByItemID(ctx, v.ID)
 		items[i] = Item{
 			v,
 			tags,
@@ -103,10 +124,7 @@ func (s *Service) UpdateItem(ctx context.Context, item *Item) (*Item, error) {
 	}
 
 	// Fetch existing tags from the database
-	existingTags, err := s.Repo.ListTagsByItemID(ctx, data.ID)
-	if err != nil {
-		existingTags = make([]string, 0)
-	}
+	existingTags := s.listTagsByItemID(ctx, data.ID)
 
 	// Create maps for efficient lookup
 	existingTagsMap := make(map[string]struct{}, len(existingTags))

@@ -1,4 +1,4 @@
-package items
+package itemsbytag
 
 import "strings"
 

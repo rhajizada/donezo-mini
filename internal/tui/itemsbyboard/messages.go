@@ -1,4 +1,4 @@
-package items
+package itemsbyboard
 
 import "github.com/rhajizada/donezo-mini/internal/service"
 
