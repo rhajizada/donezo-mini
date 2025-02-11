@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/rhajizada/donezo-mini/internal/service"
-	"github.com/rhajizada/donezo-mini/internal/tui/list"
+	"github.com/rhajizada/donezo-mini/internal/tui/itemlist"
 )
 
 // Item represents item in the list
@@ -12,15 +12,15 @@ type Item struct {
 	Itm service.Item
 }
 
-func NewList(items *[]service.Item) []list.Item {
-	l := make([]list.Item, len(*items))
+func NewList(items *[]service.Item) []itemlist.Item {
+	l := make([]itemlist.Item, len(*items))
 	for i, item := range *items {
 		l[i] = Item{Itm: item}
 	}
 	return l
 }
 
-func NewItem(item *service.Item) list.Item {
+func NewItem(item *service.Item) itemlist.Item {
 	return Item{
 		Itm: *item,
 	}

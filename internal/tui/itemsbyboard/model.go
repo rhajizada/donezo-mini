@@ -7,13 +7,13 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/rhajizada/donezo-mini/internal/service"
 	"github.com/rhajizada/donezo-mini/internal/tui/boards"
-	"github.com/rhajizada/donezo-mini/internal/tui/list"
+	"github.com/rhajizada/donezo-mini/internal/tui/itemlist"
 )
 
 type MenuModel struct {
 	ctx     context.Context
 	Parent  *boards.MenuModel
-	List    list.Model
+	List    itemlist.Model
 	Input   textinput.Model
 	Keys    *Keymap
 	Context *InputContext
@@ -24,9 +24,9 @@ func (m MenuModel) Init() tea.Cmd {
 	return m.ListItems()
 }
 
-func NewModel(ctx context.Context, service *service.Service, parent *boards.MenuModel) MenuModel {
-	list := list.New(
-		[]list.Item{},
+func New(ctx context.Context, service *service.Service, parent *boards.MenuModel) MenuModel {
+	list := itemlist.New(
+		[]itemlist.Item{},
 		NewDelegate(),
 		0,
 		0,

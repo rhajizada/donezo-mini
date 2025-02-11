@@ -18,8 +18,8 @@ type AppModel struct {
 	MenuType       MenuType           // NEW: tracks whether main view is boards or tags
 }
 
-func NewModel(ctx context.Context, service *service.Service) AppModel {
-	boardMenu := boards.NewModel(ctx, service)
+func New(ctx context.Context, service *service.Service) AppModel {
+	boardMenu := boards.New(ctx, service)
 	return AppModel{
 		ctx:            ctx,
 		Service:        service,

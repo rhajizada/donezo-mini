@@ -8,19 +8,19 @@ import (
 	"github.com/rhajizada/donezo-mini/internal/tui/styles"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/rhajizada/donezo-mini/internal/tui/list"
+	"github.com/rhajizada/donezo-mini/internal/tui/itemlist"
 )
 
 // Define custom styles
 // ListDelegate is a fully custom delegate that replicates the default behavior
 // but adds a strikethrough to completed items and applies padding.
 type ListDelegate struct {
-	*list.DefaultDelegate // Embed as a pointer to avoid invalid indirection
+	*itemlist.DefaultDelegate // Embed as a pointer to avoid invalid indirection
 }
 
 // NewDelegate initializes a new CustomDelegate with default styles.
 func NewDelegate() *ListDelegate {
-	delegate := list.NewDefaultDelegate()
+	delegate := itemlist.NewDefaultDelegate()
 
 	return &ListDelegate{
 		DefaultDelegate: &delegate,
@@ -28,7 +28,7 @@ func NewDelegate() *ListDelegate {
 }
 
 // Render overrides the DefaultDelegate's Render method to apply custom styles.
-func (d *ListDelegate) Render(w io.Writer, m list.Model, index int, item list.Item) {
+func (d *ListDelegate) Render(w io.Writer, m itemlist.Model, index int, item itemlist.Item) {
 	selected, ok := item.(Item)
 	if !ok {
 		return

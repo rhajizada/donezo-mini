@@ -1,7 +1,7 @@
 // Package list provides a feature-rich Bubble Tea component for browsing
 // a general purpose list of items. It features optional filtering, pagination,
 // help, status messages, and a spinner to indicate activity.
-package list
+package itemlist
 
 import (
 	"fmt"

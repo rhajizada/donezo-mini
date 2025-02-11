@@ -56,7 +56,7 @@ func main() {
 	s := service.New(r)
 	ctx := context.Background()
 
-	m := app.NewModel(ctx, s)
+	m := app.New(ctx, s)
 	p := tea.NewProgram(m, tea.WithAltScreen())
 
 	if _, err := p.Run(); err != nil {

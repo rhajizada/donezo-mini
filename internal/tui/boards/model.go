@@ -22,7 +22,7 @@ func (m MenuModel) Init() tea.Cmd {
 	return m.ListBoards()
 }
 
-func NewModel(ctx context.Context, client *service.Service) MenuModel {
+func New(ctx context.Context, client *service.Service) MenuModel {
 	list := list.New(
 		[]list.Item{},
 		list.NewDefaultDelegate(),

@@ -29,7 +29,7 @@ func (m *AppModel) NextBoard() (tea.Cmd, bool) {
 				board := m.GetCurrentBoard()
 				if board != nil {
 					// Replace the current item menu with a new one for the new board
-					itemMenu := itemsbyboard.NewModel(m.ctx, m.Service, board)
+					itemMenu := itemsbyboard.New(m.ctx, m.Service, board)
 					// Replace the top of the view stack
 					m.ViewStack[len(m.ViewStack)-1] = itemMenu
 					// Apply last window size
@@ -85,7 +85,7 @@ func (m *AppModel) PreviousBoard() (tea.Cmd, bool) {
 				board := m.GetCurrentBoard()
 				if board != nil {
 					// Replace the current item menu with a new one for the new board
-					itemMenu := itemsbyboard.NewModel(m.ctx, m.Service, board)
+					itemMenu := itemsbyboard.New(m.ctx, m.Service, board)
 					// Replace the top of the view stack
 					m.ViewStack[len(m.ViewStack)-1] = itemMenu
 					// Apply last window size
@@ -118,7 +118,7 @@ func (m *AppModel) SelectBoard() (tea.Cmd, bool) {
 	// If on the board view, switch to the item view
 	if blist, ok := m.ViewStack[len(m.ViewStack)-1].(boards.MenuModel); ok {
 		if &blist != nil && blist.State == boards.DefaultState {
-			itemMenu := itemsbyboard.NewModel(m.ctx, m.Service, &blist)
+			itemMenu := itemsbyboard.New(m.ctx, m.Service, &blist)
 			m.Push(itemMenu)
 			cmd = tea.Batch(itemMenu.Init())
 			handled = true
@@ -141,7 +141,7 @@ func (m *AppModel) NextTag() (tea.Cmd, bool) {
 				tagMenu.List.Select(index + 1)
 				m.ViewStack[0] = tagMenu
 				// Rebuild the items-by-tag view using the new tag.
-				newView := itemsbytag.NewModel(m.ctx, m.Service, &tagMenu)
+				newView := itemsbytag.New(m.ctx, m.Service, &tagMenu)
 				m.ViewStack[len(m.ViewStack)-1] = newView
 				if m.LastWindowSize != nil {
 					m.ApplyWindowSizeToCurrent(*m.LastWindowSize)
@@ -170,7 +170,7 @@ func (m *AppModel) PreviousTag() (tea.Cmd, bool) {
 			if index-1 >= 0 {
 				tagMenu.List.Select(index - 1)
 				m.ViewStack[0] = tagMenu
-				newView := itemsbytag.NewModel(m.ctx, m.Service, &tagMenu)
+				newView := itemsbytag.New(m.ctx, m.Service, &tagMenu)
 				m.ViewStack[len(m.ViewStack)-1] = newView
 				if m.LastWindowSize != nil {
 					m.ApplyWindowSizeToCurrent(*m.LastWindowSize)
@@ -196,7 +196,7 @@ func (m *AppModel) SelectTag() (tea.Cmd, bool) {
 	if tagMenu, ok := m.ViewStack[len(m.ViewStack)-1].(tags.MenuModel); ok {
 		// Create an items-by-tag model.
 		// Note: itemsbytag.NewModel expects a pointer to the tag menu.
-		itemMenu := itemsbytag.NewModel(m.ctx, m.Service, &tagMenu)
+		itemMenu := itemsbytag.New(m.ctx, m.Service, &tagMenu)
 		// Push the new view onto the stack.
 		m.Push(itemMenu)
 		cmd = tea.Batch(itemMenu.Init())
@@ -294,7 +294,7 @@ func (m *AppModel) ToggleMainMenu() tea.Cmd {
 		newMain = tags.NewModel(m.ctx, m.Service)
 	} else {
 		m.MenuType = MenuBoards
-		newMain = boards.NewModel(m.ctx, m.Service)
+		newMain = boards.New(m.ctx, m.Service)
 	}
 	m.ViewStack[0] = newMain
 	initCmd := newMain.Init()
