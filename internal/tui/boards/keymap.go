@@ -7,6 +7,7 @@ import (
 // Keymap embeds default list keymap and adds other Binding
 type Keymap struct {
 	Choose        key.Binding
+	ListTags      key.Binding
 	CreateBoard   key.Binding
 	DeleteBoard   key.Binding
 	RenameBoard   key.Binding
@@ -20,6 +21,10 @@ func NewKeymap() Keymap {
 		Choose: key.NewBinding(
 			key.WithKeys("return"),
 			key.WithHelp("return", "choose board"),
+		),
+		ListTags: key.NewBinding(
+			key.WithKeys("tab"),
+			key.WithHelp("tab", "list tags"),
 		),
 		CreateBoard: key.NewBinding(
 			key.WithKeys("a"),
@@ -40,7 +45,7 @@ func NewKeymap() Keymap {
 func (km Keymap) ShortHelp() []key.Binding {
 	bindings := []key.Binding{}
 	bindings = append(bindings, km.Choose)
-	bindings = append(bindings, km.CreateBoard)
+	bindings = append(bindings, km.ListTags)
 	return bindings
 }
 
