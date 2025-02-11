@@ -40,8 +40,3 @@ make install
 
   - Add support for custom app styling.
   - Introduce configuration options for app customization.
-
-- 0.3.0
-  - `Tags`
-    - Enable items on boards to be tagged with any word.
-    - Add aggregated tag views, accessible in both the service layer and the TUI.
