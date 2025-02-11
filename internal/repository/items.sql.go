@@ -7,6 +7,7 @@ package repository
 
 import (
 	"context"
+	"time"
 )
 
 const createItem = `-- name: CreateItem :one
@@ -50,15 +51,35 @@ func (q *Queries) DeleteItemByID(ctx context.Context, id int64) error {
 }
 
 const getItemByID = `-- name: GetItemByID :one
-SELECT
-id, board_id, title, description, completed, created_at, last_updated_at
-FROM items
-WHERE items.id = ?
+SELECT 
+    i.id,
+    i.board_id,
+    i.title,
+    i.description,
+    i.completed,
+    i.created_at,
+    i.last_updated_at,
+    COALESCE(json_group_array(t.tag), '[]') AS tags
+FROM items i
+LEFT JOIN tags t ON i.id = t.item_id
+WHERE i.id = ?
+GROUP BY i.id
 `
 
-func (q *Queries) GetItemByID(ctx context.Context, id int64) (Item, error) {
+type GetItemByIDRow struct {
+	ID            int64       `json:"id"`
+	BoardID       int64       `json:"boardId"`
+	Title         string      `json:"title"`
+	Description   string      `json:"description"`
+	Completed     bool        `json:"completed"`
+	CreatedAt     time.Time   `json:"createdAt"`
+	LastUpdatedAt time.Time   `json:"lastUpdatedAt"`
+	Tags          interface{} `json:"tags"`
+}
+
+func (q *Queries) GetItemByID(ctx context.Context, id int64) (GetItemByIDRow, error) {
 	row := q.db.QueryRowContext(ctx, getItemByID, id)
-	var i Item
+	var i GetItemByIDRow
 	err := row.Scan(
 		&i.ID,
 		&i.BoardID,
@@ -67,27 +88,48 @@ func (q *Queries) GetItemByID(ctx context.Context, id int64) (Item, error) {
 		&i.Completed,
 		&i.CreatedAt,
 		&i.LastUpdatedAt,
+		&i.Tags,
 	)
 	return i, err
 }
 
-const listItemsByBoardID = `-- name: ListItemsByBoardID :many
-SELECT
-id, board_id, title, description, completed, created_at, last_updated_at
-FROM items
-WHERE items.board_id = ?
-ORDER BY items.created_at
+const listItemsWithTagsByBoardID = `-- name: ListItemsWithTagsByBoardID :many
+SELECT 
+    i.id,
+    i.board_id,
+    i.title,
+    i.description,
+    i.completed,
+    i.created_at,
+    i.last_updated_at,
+    COALESCE(json_group_array(t.tag), '[]') AS tags
+FROM items i
+LEFT JOIN tags t ON i.id = t.item_id
+WHERE i.board_id = ?
+GROUP BY i.id
+ORDER BY i.created_at
 `
 
-func (q *Queries) ListItemsByBoardID(ctx context.Context, boardID int64) ([]Item, error) {
-	rows, err := q.db.QueryContext(ctx, listItemsByBoardID, boardID)
+type ListItemsWithTagsByBoardIDRow struct {
+	ID            int64       `json:"id"`
+	BoardID       int64       `json:"boardId"`
+	Title         string      `json:"title"`
+	Description   string      `json:"description"`
+	Completed     bool        `json:"completed"`
+	CreatedAt     time.Time   `json:"createdAt"`
+	LastUpdatedAt time.Time   `json:"lastUpdatedAt"`
+	Tags          interface{} `json:"tags"`
+}
+
+func (q *Queries) ListItemsWithTagsByBoardID(ctx context.Context, boardID int64) ([]ListItemsWithTagsByBoardIDRow, error) {
+	rows, err := q.db.QueryContext(ctx, listItemsWithTagsByBoardID, boardID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Item
+	var items []ListItemsWithTagsByBoardIDRow
 	for rows.Next() {
-		var i Item
+		var i ListItemsWithTagsByBoardIDRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.BoardID,
@@ -96,6 +138,7 @@ func (q *Queries) ListItemsByBoardID(ctx context.Context, boardID int64) ([]Item
 			&i.Completed,
 			&i.CreatedAt,
 			&i.LastUpdatedAt,
+			&i.Tags,
 		); err != nil {
 			return nil, err
 		}

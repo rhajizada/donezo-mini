@@ -7,6 +7,7 @@ package repository
 
 import (
 	"context"
+	"time"
 )
 
 const addTagToItemByID = `-- name: AddTagToItemByID :exec
@@ -40,7 +41,8 @@ func (q *Queries) CountItemsByTag(ctx context.Context, tag string) (int64, error
 }
 
 const deleteTag = `-- name: DeleteTag :exec
-DELETE FROM tags WHERE tag = ?
+DELETE FROM tags
+WHERE tag = ?
 `
 
 func (q *Queries) DeleteTag(ctx context.Context, tag string) error {
@@ -50,23 +52,42 @@ func (q *Queries) DeleteTag(ctx context.Context, tag string) error {
 
 const listItemsByTag = `-- name: ListItemsByTag :many
 SELECT 
-    i.id, i.board_id, i.title, i.description, i.completed, 
-    i.created_at, i.last_updated_at
+    i.id,
+    i.board_id,
+    i.title,
+    i.description,
+    i.completed,
+    i.created_at,
+    i.last_updated_at,
+    COALESCE(json_group_array(t2.tag), '[]') AS tags
 FROM items i
 JOIN tags t ON i.id = t.item_id
+LEFT JOIN tags t2 ON i.id = t2.item_id
 WHERE t.tag = ?
+GROUP BY i.id
 ORDER BY i.created_at
 `
 
-func (q *Queries) ListItemsByTag(ctx context.Context, tag string) ([]Item, error) {
+type ListItemsByTagRow struct {
+	ID            int64       `json:"id"`
+	BoardID       int64       `json:"boardId"`
+	Title         string      `json:"title"`
+	Description   string      `json:"description"`
+	Completed     bool        `json:"completed"`
+	CreatedAt     time.Time   `json:"createdAt"`
+	LastUpdatedAt time.Time   `json:"lastUpdatedAt"`
+	Tags          interface{} `json:"tags"`
+}
+
+func (q *Queries) ListItemsByTag(ctx context.Context, tag string) ([]ListItemsByTagRow, error) {
 	rows, err := q.db.QueryContext(ctx, listItemsByTag, tag)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Item
+	var items []ListItemsByTagRow
 	for rows.Next() {
-		var i Item
+		var i ListItemsByTagRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.BoardID,
@@ -75,6 +96,7 @@ func (q *Queries) ListItemsByTag(ctx context.Context, tag string) ([]Item, error
 			&i.Completed,
 			&i.CreatedAt,
 			&i.LastUpdatedAt,
+			&i.Tags,
 		); err != nil {
 			return nil, err
 		}
@@ -117,7 +139,9 @@ func (q *Queries) ListTags(ctx context.Context) ([]string, error) {
 }
 
 const listTagsByItemID = `-- name: ListTagsByItemID :many
-SELECT tag FROM tags WHERE item_id = ? ORDER BY tag
+SELECT tag FROM tags
+WHERE item_id = ?
+ORDER BY tag
 `
 
 func (q *Queries) ListTagsByItemID(ctx context.Context, itemID int64) ([]string, error) {

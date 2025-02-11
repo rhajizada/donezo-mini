@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/rhajizada/donezo-mini/internal/repository"
 )
@@ -16,6 +17,26 @@ func New(r *repository.Queries) *Service {
 	}
 }
 
+// unmarshalTags converts the interface returned from sqlc for the tags field
+// into a slice of strings by performing the proper type assertions.
+func unmarshalTags(v interface{}) []string {
+	var tags []string
+	switch t := v.(type) {
+	case []byte:
+		if err := json.Unmarshal(t, &tags); err != nil {
+			return []string{}
+		}
+	case string:
+		if err := json.Unmarshal([]byte(t), &tags); err != nil {
+			return []string{}
+		}
+	default:
+		return []string{}
+	}
+	return tags
+}
+
+// Board-related functions.
 func (s *Service) ListBoards(ctx context.Context) (*[]Board, error) {
 	data, err := s.Repo.ListBoards(ctx)
 	if err != nil {
@@ -25,7 +46,6 @@ func (s *Service) ListBoards(ctx context.Context) (*[]Board, error) {
 	for i, b := range data {
 		boards[i] = Board{b}
 	}
-
 	return &boards, nil
 }
 
@@ -38,11 +58,11 @@ func (s *Service) CreateBoard(ctx context.Context, boardName string) (*Board, er
 }
 
 func (s *Service) UpdateBoard(ctx context.Context, board *Board) (*Board, error) {
-	b := repository.UpdateBoardByIDParams{
+	params := repository.UpdateBoardByIDParams{
 		Name: board.Name,
 		ID:   board.ID,
 	}
-	data, err := s.Repo.UpdateBoardByID(ctx, b)
+	data, err := s.Repo.UpdateBoardByID(ctx, params)
 	if err != nil {
 		return nil, err
 	}
@@ -53,22 +73,32 @@ func (s *Service) DeleteBoard(ctx context.Context, board *Board) error {
 	return s.Repo.DeleteBoardByID(ctx, board.ID)
 }
 
-func (s *Service) ListItems(ctx context.Context, board *Board) (*[]Item, error) {
-	data, err := s.Repo.ListItemsByBoardID(ctx, board.ID)
+// ListItemsByBoard uses the aggregated JSON query and unmarshals the tags.
+func (s *Service) ListItemsByBoard(ctx context.Context, board *Board) (*[]Item, error) {
+	data, err := s.Repo.ListItemsWithTagsByBoardID(ctx, board.ID)
 	if err != nil {
 		return nil, err
 	}
 	items := make([]Item, len(data))
 	for i, v := range data {
-		tags := s.listTagsByItemID(ctx, v.ID)
+		tags := unmarshalTags(v.Tags)
 		items[i] = Item{
-			v,
-			tags,
+			Item: repository.Item{
+				ID:            v.ID,
+				BoardID:       v.BoardID,
+				Title:         v.Title,
+				Description:   v.Description,
+				Completed:     v.Completed,
+				CreatedAt:     v.CreatedAt,
+				LastUpdatedAt: v.LastUpdatedAt,
+			},
+			Tags: tags,
 		}
 	}
 	return &items, nil
 }
 
+// ListItemsByTag uses the updated aggregated query and unmarshals the tags.
 func (s *Service) ListItemsByTag(ctx context.Context, tag string) (*[]Item, error) {
 	data, err := s.Repo.ListItemsByTag(ctx, tag)
 	if err != nil {
@@ -76,65 +106,68 @@ func (s *Service) ListItemsByTag(ctx context.Context, tag string) (*[]Item, erro
 	}
 	items := make([]Item, len(data))
 	for i, v := range data {
-		tags := s.listTagsByItemID(ctx, v.ID)
+		tags := unmarshalTags(v.Tags)
 		items[i] = Item{
-			v,
-			tags,
+			Item: repository.Item{
+				ID:            v.ID,
+				BoardID:       v.BoardID,
+				Title:         v.Title,
+				Description:   v.Description,
+				Completed:     v.Completed,
+				CreatedAt:     v.CreatedAt,
+				LastUpdatedAt: v.LastUpdatedAt,
+			},
+			Tags: tags,
 		}
 	}
 	return &items, nil
 }
 
 func (s *Service) CreateItem(ctx context.Context, board *Board, title string, description string) (*Item, error) {
-	i := repository.CreateItemParams{
+	params := repository.CreateItemParams{
 		BoardID:     board.ID,
 		Title:       title,
 		Description: description,
 	}
-
-	data, err := s.Repo.CreateItem(ctx, i)
+	data, err := s.Repo.CreateItem(ctx, params)
 	if err != nil {
 		return nil, err
 	}
 	return &Item{
-		data,
-		make([]string, 0),
+		Item: data,
+		Tags: []string{},
 	}, nil
 }
 
 func (s *Service) UpdateItem(ctx context.Context, item *Item) (*Item, error) {
-	i := repository.UpdateItemByIDParams{
+	params := repository.UpdateItemByIDParams{
 		Title:       item.Title,
 		Description: item.Description,
 		Completed:   item.Completed,
 		ID:          item.ID,
 	}
-
-	data, err := s.Repo.UpdateItemByID(ctx, i)
+	data, err := s.Repo.UpdateItemByID(ctx, params)
 	if err != nil {
 		return nil, err
 	}
 
-	// Fetch existing tags from the database
+	// Synchronize tags.
 	existingTags := s.listTagsByItemID(ctx, data.ID)
-
-	// Create maps for efficient lookup
 	existingTagsMap := make(map[string]struct{}, len(existingTags))
-	for _, tag := range existingTags {
-		existingTagsMap[tag] = struct{}{}
+	for _, t := range existingTags {
+		existingTagsMap[t] = struct{}{}
 	}
-
 	newTagsMap := make(map[string]struct{}, len(item.Tags))
-	for _, tag := range item.Tags {
-		newTagsMap[tag] = struct{}{}
+	for _, t := range item.Tags {
+		newTagsMap[t] = struct{}{}
 	}
 
-	// Remove tags that are not in the updated item
-	for _, tag := range existingTags {
-		if _, found := newTagsMap[tag]; !found {
+	// Remove tags that are not in the updated item.
+	for _, t := range existingTags {
+		if _, found := newTagsMap[t]; !found {
 			err := s.Repo.RemoveTagFromItemByID(ctx, repository.RemoveTagFromItemByIDParams{
 				ItemID: data.ID,
-				Tag:    tag,
+				Tag:    t,
 			})
 			if err != nil {
 				return nil, err
@@ -142,12 +175,12 @@ func (s *Service) UpdateItem(ctx context.Context, item *Item) (*Item, error) {
 		}
 	}
 
-	// Add new tags that are missing in the database
-	for _, tag := range item.Tags {
-		if _, found := existingTagsMap[tag]; !found {
+	// Add new tags that are missing in the database.
+	for _, t := range item.Tags {
+		if _, found := existingTagsMap[t]; !found {
 			err := s.Repo.AddTagToItemByID(ctx, repository.AddTagToItemByIDParams{
 				ItemID: data.ID,
-				Tag:    tag,
+				Tag:    t,
 			})
 			if err != nil {
 				return nil, err
@@ -156,8 +189,8 @@ func (s *Service) UpdateItem(ctx context.Context, item *Item) (*Item, error) {
 	}
 
 	return &Item{
-		data,
-		item.Tags, // Return the updated tags
+		Item: data,
+		Tags: item.Tags, // Return the updated tags.
 	}, nil
 }
 
@@ -165,14 +198,16 @@ func (s *Service) DeleteItem(ctx context.Context, item *Item) error {
 	return s.Repo.DeleteItemByID(ctx, item.ID)
 }
 
+// Private helper to get tags for an item.
 func (s *Service) listTagsByItemID(ctx context.Context, itemID int64) []string {
 	tags, err := s.Repo.ListTagsByItemID(ctx, itemID)
 	if err != nil {
-		tags = make([]string, 0)
+		return []string{}
 	}
 	return tags
 }
 
+// Tag-related functions.
 func (s *Service) ListTags(ctx context.Context) ([]string, error) {
 	return s.Repo.ListTags(ctx)
 }

@@ -15,7 +15,7 @@ const TagsSeparator = ", "
 func (m *MenuModel) ListItems() tea.Cmd {
 	return func() tea.Msg {
 		parentItem := m.Parent.List.SelectedItem().(boards.Item)
-		items, err := m.Service.ListItems(m.ctx, &parentItem.Board)
+		items, err := m.Service.ListItemsByBoard(m.ctx, &parentItem.Board)
 		if err != nil {
 			return ErrorMsg{err}
 		}

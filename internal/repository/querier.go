@@ -17,10 +17,10 @@ type Querier interface {
 	DeleteItemByID(ctx context.Context, id int64) error
 	DeleteTag(ctx context.Context, tag string) error
 	GetBoardByID(ctx context.Context, id int64) (Board, error)
-	GetItemByID(ctx context.Context, id int64) (Item, error)
+	GetItemByID(ctx context.Context, id int64) (GetItemByIDRow, error)
 	ListBoards(ctx context.Context) ([]Board, error)
-	ListItemsByBoardID(ctx context.Context, boardID int64) ([]Item, error)
-	ListItemsByTag(ctx context.Context, tag string) ([]Item, error)
+	ListItemsByTag(ctx context.Context, tag string) ([]ListItemsByTagRow, error)
+	ListItemsWithTagsByBoardID(ctx context.Context, boardID int64) ([]ListItemsWithTagsByBoardIDRow, error)
 	ListTags(ctx context.Context) ([]string, error)
 	ListTagsByItemID(ctx context.Context, itemID int64) ([]string, error)
 	RemoveTagFromItemByID(ctx context.Context, arg RemoveTagFromItemByIDParams) error
