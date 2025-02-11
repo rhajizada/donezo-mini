@@ -267,7 +267,7 @@ func (m *AppModel) HandleKeyInput(msg tea.KeyMsg) (tea.Cmd, bool) {
 			case tea.KeyEnter.String():
 				// In tag view, you might choose not to do any action on Enter.
 				cmd = nil
-				handled = true
+				handled = false
 			case tea.KeyBackspace.String():
 				cmd, handled = m.Back()
 			}
