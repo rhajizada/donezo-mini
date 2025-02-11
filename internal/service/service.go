@@ -53,14 +53,6 @@ func (s *Service) DeleteBoard(ctx context.Context, board *Board) error {
 	return s.Repo.DeleteBoardByID(ctx, board.ID)
 }
 
-func (s *Service) listTagsByItemID(ctx context.Context, itemID int64) []string {
-	tags, err := s.Repo.ListTagsByItemID(ctx, itemID)
-	if err != nil {
-		tags = make([]string, 0)
-	}
-	return tags
-}
-
 func (s *Service) ListItems(ctx context.Context, board *Board) (*[]Item, error) {
 	data, err := s.Repo.ListItemsByBoardID(ctx, board.ID)
 	if err != nil {
@@ -171,6 +163,14 @@ func (s *Service) UpdateItem(ctx context.Context, item *Item) (*Item, error) {
 
 func (s *Service) DeleteItem(ctx context.Context, item *Item) error {
 	return s.Repo.DeleteItemByID(ctx, item.ID)
+}
+
+func (s *Service) listTagsByItemID(ctx context.Context, itemID int64) []string {
+	tags, err := s.Repo.ListTagsByItemID(ctx, itemID)
+	if err != nil {
+		tags = make([]string, 0)
+	}
+	return tags
 }
 
 func (s *Service) ListTags(ctx context.Context) ([]string, error) {
