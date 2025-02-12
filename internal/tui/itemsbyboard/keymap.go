@@ -47,10 +47,6 @@ func NewKeymap() *Keymap {
 			key.WithKeys(" "),
 			key.WithHelp("space", "toggle complete"),
 		),
-		Cut: key.NewBinding(
-			key.WithKeys("x"),
-			key.WithKeys("x", "cut"),
-		),
 		Copy: key.NewBinding(
 			key.WithKeys("y"),
 			key.WithKeys("y", "copy"),

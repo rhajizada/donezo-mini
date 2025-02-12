@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/rhajizada/donezo-mini/internal/service"
 	"github.com/rhajizada/donezo-mini/internal/tui/boards"
 	"github.com/rhajizada/donezo-mini/internal/tui/styles"
 	"golang.design/x/clipboard"
@@ -15,7 +16,7 @@ import (
 const TagsSeparator = ", "
 
 // Copy copies selected item to clipboard and moves it to ItemStack
-func (m *MenuModel) Copy(deleteOnCopy bool) tea.Cmd {
+func (m *MenuModel) Copy() tea.Cmd {
 	selectedItem := m.List.SelectedItem().(Item).Itm
 	data, err := json.Marshal(selectedItem)
 	if err != nil {
@@ -25,28 +26,22 @@ func (m *MenuModel) Copy(deleteOnCopy bool) tea.Cmd {
 	}
 
 	clipboard.Write(clipboard.FmtText, data)
-	m.Parent.ItemStack.Push(selectedItem)
-	if deleteOnCopy {
-		err = m.Service.DeleteItem(m.ctx, &selectedItem)
-		return func() tea.Msg {
-			return DeleteItemMsg{Error: err, Item: &selectedItem}
-		}
-	} else {
-		return m.List.NewStatusMessage(
-			styles.StatusMessage.Render(
-				fmt.Sprintf("copied \"%s\" to system clipboard", selectedItem.Title),
-			),
-		)
-	}
+	return m.List.NewStatusMessage(
+		styles.StatusMessage.Render(
+			fmt.Sprintf("copied \"%s\" to system clipboard", selectedItem.Title),
+		),
+	)
 }
 
 // Paste pastes item into current board
 func (m *MenuModel) Paste() tea.Cmd {
-	lastItem, ok := m.Parent.ItemStack.Pop()
-	if !ok {
+	data := clipboard.Read(clipboard.FmtText)
+	var lastItem service.Item
+	err := json.Unmarshal(data, &lastItem)
+	if err != nil {
 		return m.List.NewStatusMessage(
 			styles.ErrorMessage.Render(
-				"no items in clipboard",
+				fmt.Sprintf("no items in clipboard: %v", err),
 			),
 		)
 	}
@@ -58,6 +53,7 @@ func (m *MenuModel) Paste() tea.Cmd {
 		}
 	}
 	item.Tags = lastItem.Tags
+	item.Completed = lastItem.Completed
 	item, err = m.Service.UpdateItem(m.ctx, item)
 	return func() tea.Msg {
 		return CreateItemMsg{item, err}
@@ -152,10 +148,11 @@ func (m *MenuModel) InitUpdateTags() tea.Cmd {
 
 // DeleteBoard deletes current selected board
 func (m *MenuModel) DeleteItem() tea.Cmd {
+	m.Copy()
+	selectedItem := m.List.SelectedItem().(Item).Itm
+	err := m.Service.DeleteItem(m.ctx, &selectedItem)
 	return func() tea.Msg {
-		selected := m.List.SelectedItem().(Item)
-		err := m.Service.DeleteItem(m.ctx, &selected.Itm)
-		return DeleteItemMsg{Error: err, Item: &selected.Itm}
+		return DeleteItemMsg{Error: err, Item: &selectedItem}
 	}
 }
 
