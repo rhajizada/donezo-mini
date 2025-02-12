@@ -12,6 +12,7 @@ type Keymap struct {
 	DeleteBoard   key.Binding
 	RenameBoard   key.Binding
 	RefreshList   key.Binding
+	Copy          key.Binding
 	NextBoard     key.Binding
 	PreviousBoard key.Binding
 }
@@ -39,6 +40,9 @@ func NewKeymap() Keymap {
 		RefreshList: key.NewBinding(key.WithKeys("R"),
 			key.WithHelp("R", "refresh list"),
 		),
+		Copy: key.NewBinding(key.WithKeys("y"),
+			key.WithHelp("y", "copy name to system clipboard"),
+		),
 	}
 }
 
@@ -56,5 +60,6 @@ func (km Keymap) FullHelp() []key.Binding {
 	bindings = append(bindings, km.DeleteBoard)
 	bindings = append(bindings, km.RenameBoard)
 	bindings = append(bindings, km.RefreshList)
+	bindings = append(bindings, km.Copy)
 	return bindings
 }

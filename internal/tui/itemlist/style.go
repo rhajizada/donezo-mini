@@ -41,6 +41,8 @@ type Styles struct {
 
 // DefaultStyles returns a set of default style definitions for this list
 // component.
+//
+// TODO: styles from files
 func DefaultStyles() (s Styles) {
 	verySubduedColor := lipgloss.AdaptiveColor{Light: "#DDDADA", Dark: "#3C3C3C"}
 	subduedColor := lipgloss.AdaptiveColor{Light: "#9B9B9B", Dark: "#5C5C5C"}

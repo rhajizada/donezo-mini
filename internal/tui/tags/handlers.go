@@ -49,6 +49,8 @@ func (m *MenuModel) HandleKeyInput(msg tea.KeyMsg) tea.Cmd {
 		cmd = m.DeleteTag()
 	case key.Matches(msg, m.Keys.RefreshList):
 		cmd = m.ListTags()
+	case key.Matches(msg, m.Keys.Copy):
+		cmd = m.Copy()
 	}
 	return cmd
 }

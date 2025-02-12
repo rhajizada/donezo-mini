@@ -1,15 +1,68 @@
 package itemsbyboard
 
 import (
+	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/rhajizada/donezo-mini/internal/tui/boards"
 	"github.com/rhajizada/donezo-mini/internal/tui/styles"
+	"golang.design/x/clipboard"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 const TagsSeparator = ", "
+
+// Copy copies selected item to clipboard and moves it to ItemStack
+func (m *MenuModel) Copy(deleteOnCopy bool) tea.Cmd {
+	selectedItem := m.List.SelectedItem().(Item).Itm
+	data, err := json.Marshal(selectedItem)
+	if err != nil {
+		return func() tea.Msg {
+			return ErrorMsg{err}
+		}
+	}
+
+	clipboard.Write(clipboard.FmtText, data)
+	m.Parent.ItemStack.Push(selectedItem)
+	if deleteOnCopy {
+		err = m.Service.DeleteItem(m.ctx, &selectedItem)
+		return func() tea.Msg {
+			return DeleteItemMsg{Error: err, Item: &selectedItem}
+		}
+	} else {
+		return m.List.NewStatusMessage(
+			styles.StatusMessage.Render(
+				fmt.Sprintf("copied \"%s\" to system clipboard", selectedItem.Title),
+			),
+		)
+	}
+}
+
+// Paste pastes item into current board
+func (m *MenuModel) Paste() tea.Cmd {
+	lastItem, ok := m.Parent.ItemStack.Pop()
+	if !ok {
+		return m.List.NewStatusMessage(
+			styles.ErrorMessage.Render(
+				"no items in clipboard",
+			),
+		)
+	}
+	currentBoard := m.Parent.List.SelectedItem().(boards.Item).Board
+	item, err := m.Service.CreateItem(m.ctx, &currentBoard, lastItem.Title, lastItem.Description)
+	if err != nil {
+		return func() tea.Msg {
+			return ErrorMsg{err}
+		}
+	}
+	item.Tags = lastItem.Tags
+	item, err = m.Service.UpdateItem(m.ctx, item)
+	return func() tea.Msg {
+		return CreateItemMsg{item, err}
+	}
+}
 
 // ListItems fetches items ine the selected board.
 func (m *MenuModel) ListItems() tea.Cmd {

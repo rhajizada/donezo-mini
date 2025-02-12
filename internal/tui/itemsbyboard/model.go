@@ -6,18 +6,20 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/rhajizada/donezo-mini/internal/service"
+	"github.com/rhajizada/donezo-mini/internal/stack"
 	"github.com/rhajizada/donezo-mini/internal/tui/boards"
 	"github.com/rhajizada/donezo-mini/internal/tui/itemlist"
 )
 
 type MenuModel struct {
-	ctx     context.Context
-	Parent  *boards.MenuModel
-	List    itemlist.Model
-	Input   textinput.Model
-	Keys    *Keymap
-	Context *InputContext
-	Service *service.Service
+	ctx       context.Context
+	Parent    *boards.MenuModel
+	List      itemlist.Model
+	Input     textinput.Model
+	Keys      *Keymap
+	Context   *InputContext
+	ItemStack stack.Stack[service.Item]
+	Service   *service.Service
 }
 
 func (m MenuModel) Init() tea.Cmd {

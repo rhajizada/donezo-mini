@@ -188,6 +188,12 @@ func (m *MenuModel) HandleKeyInput(msg tea.KeyMsg) tea.Cmd {
 		cmd = m.ToggleComplete()
 	case key.Matches(msg, m.Keys.RefreshList):
 		cmd = m.ListItems()
+	case key.Matches(msg, m.Keys.Cut):
+		cmd = m.Copy(true)
+	case key.Matches(msg, m.Keys.Copy):
+		cmd = m.Copy(false)
+	case key.Matches(msg, m.Keys.Paste):
+		cmd = m.Paste()
 	case key.Matches(msg, m.Keys.Back):
 		cmd = nil
 	}

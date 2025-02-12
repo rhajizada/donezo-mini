@@ -10,6 +10,7 @@ type Keymap struct {
 	ListBoards  key.Binding
 	DeleteTag   key.Binding
 	RefreshList key.Binding
+	Copy        key.Binding
 }
 
 func NewKeymap() Keymap {
@@ -28,6 +29,9 @@ func NewKeymap() Keymap {
 		RefreshList: key.NewBinding(key.WithKeys("R"),
 			key.WithHelp("R", "refresh list"),
 		),
+		Copy: key.NewBinding(key.WithKeys("y"),
+			key.WithHelp("y", "copy tag to system clipboard"),
+		),
 	}
 }
 
@@ -43,5 +47,6 @@ func (km Keymap) FullHelp() []key.Binding {
 	bindings = append(bindings, km.Choose)
 	bindings = append(bindings, km.DeleteTag)
 	bindings = append(bindings, km.RefreshList)
+	bindings = append(bindings, km.Copy)
 	return bindings
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/rhajizada/donezo-mini/internal/repository"
 	"github.com/rhajizada/donezo-mini/internal/service"
 	"github.com/rhajizada/donezo-mini/internal/tui/app"
+	"golang.design/x/clipboard"
 
 	tea "github.com/charmbracelet/bubbletea"
 	_ "github.com/mattn/go-sqlite3"
@@ -21,6 +22,11 @@ import (
 var migrations embed.FS
 
 func main() {
+	err := clipboard.Init()
+	if err != nil {
+		log.Panicf("unable to access system clipboard: %v", err)
+	}
+
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		log.Panicf("unable to determine user home directory: %v", err)

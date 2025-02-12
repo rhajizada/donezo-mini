@@ -1,7 +1,11 @@
 package boards
 
 import (
+	"fmt"
+
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/rhajizada/donezo-mini/internal/tui/styles"
+	"golang.design/x/clipboard"
 )
 
 // ListBoards fetches the list of boards from the client.
@@ -15,6 +19,17 @@ func (m *MenuModel) ListBoards() tea.Cmd {
 			boards,
 		}
 	}
+}
+
+// Copy copies board name to system clipboard
+func (m *MenuModel) Copy() tea.Cmd {
+	currentName := m.List.SelectedItem().(Item).Board.Name
+	clipboard.Write(clipboard.FmtText, []byte(currentName))
+	return m.List.NewStatusMessage(
+		styles.StatusMessage.Render(
+			fmt.Sprintf("copied \"%s\" to system clipboard", currentName),
+		),
+	)
 }
 
 // CreateBoard creates a new board

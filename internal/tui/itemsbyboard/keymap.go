@@ -10,6 +10,9 @@ type Keymap struct {
 	UpdateTags     key.Binding
 	RefreshList    key.Binding
 	ToggleComplete key.Binding
+	Cut            key.Binding
+	Copy           key.Binding
+	Paste          key.Binding
 	NextBoard      key.Binding
 	PreviousBoard  key.Binding
 }
@@ -43,6 +46,18 @@ func NewKeymap() *Keymap {
 		ToggleComplete: key.NewBinding(
 			key.WithKeys(" "),
 			key.WithHelp("space", "toggle complete"),
+		),
+		Cut: key.NewBinding(
+			key.WithKeys("x"),
+			key.WithKeys("x", "cut"),
+		),
+		Copy: key.NewBinding(
+			key.WithKeys("y"),
+			key.WithKeys("y", "copy"),
+		),
+		Paste: key.NewBinding(
+			key.WithKeys("p"),
+			key.WithKeys("p", "paste"),
 		),
 		NextBoard: key.NewBinding(
 			key.WithKeys("tab"),

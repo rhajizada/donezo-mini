@@ -1,7 +1,11 @@
 package tags
 
 import (
+	"fmt"
+
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/rhajizada/donezo-mini/internal/tui/styles"
+	"golang.design/x/clipboard"
 )
 
 // ListTags fetches the list of tags from the client.
@@ -20,6 +24,17 @@ func (m *MenuModel) ListTags() tea.Cmd {
 			tags,
 		}
 	}
+}
+
+// Copy copies tag to system clipboard
+func (m *MenuModel) Copy() tea.Cmd {
+	currentName := m.List.SelectedItem().(Item).Tag
+	clipboard.Write(clipboard.FmtText, []byte(currentName))
+	return m.List.NewStatusMessage(
+		styles.StatusMessage.Render(
+			fmt.Sprintf("copied \"%s\" to system clipboard", currentName),
+		),
+	)
 }
 
 // DeleteTag deletes current selected tag
