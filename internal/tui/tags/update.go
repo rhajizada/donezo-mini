@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/rhajizada/donezo-mini/internal/service"
 	"github.com/rhajizada/donezo-mini/internal/tui/styles"
 	"golang.design/x/clipboard"
 )
@@ -28,11 +29,19 @@ func (m *MenuModel) ListTags() tea.Cmd {
 
 // Copy copies tag to system clipboard
 func (m *MenuModel) Copy() tea.Cmd {
-	currentName := m.List.SelectedItem().(Item).Tag
-	clipboard.Write(clipboard.FmtText, []byte(currentName))
+	currentTag := m.List.SelectedItem().(Item).Tag
+
+	items, err := m.Client.ListItemsByTag(m.ctx, currentTag)
+	if err != nil {
+		return func() tea.Msg {
+			return ErrorMsg{err}
+		}
+	}
+	md := service.ItemsToMarkdown(currentTag, *items)
+	clipboard.Write(clipboard.FmtText, []byte(md))
 	return m.List.NewStatusMessage(
 		styles.StatusMessage.Render(
-			fmt.Sprintf("copied \"%s\" to system clipboard", currentName),
+			fmt.Sprintf("copied \"%s\" to system clipboard", currentTag),
 		),
 	)
 }

@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"strings"
 
 	"github.com/rhajizada/donezo-mini/internal/repository"
 )
@@ -218,4 +220,18 @@ func (s *Service) DeleteTag(ctx context.Context, tag string) error {
 
 func (s *Service) CountItemsByTag(ctx context.Context, tag string) (int64, error) {
 	return s.Repo.CountItemsByTag(ctx, tag)
+}
+
+func ItemsToMarkdown(header string, items []Item) string {
+	var md []string
+	md = append(md, fmt.Sprintf("### %s", header))
+	for _, v := range items {
+		status := " "
+		if v.Completed {
+			status = "X"
+		}
+		md = append(md, fmt.Sprintf("- [%s] **%s**", status, v.Title))
+		md = append(md, fmt.Sprintf("\t- %s", v.Description))
+	}
+	return strings.Join(md, "\n")
 }
