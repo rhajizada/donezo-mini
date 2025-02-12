@@ -35,7 +35,7 @@ LEFT JOIN tags t ON i.id = t.item_id
 WHERE i.id = ?
 GROUP BY i.id;
 
--- name: ListItemsWithTagsByBoardID :many
+-- name: ListItemsByBoardID :many
 SELECT 
     i.id,
     i.board_id,

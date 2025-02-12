@@ -93,7 +93,7 @@ func (q *Queries) GetItemByID(ctx context.Context, id int64) (GetItemByIDRow, er
 	return i, err
 }
 
-const listItemsWithTagsByBoardID = `-- name: ListItemsWithTagsByBoardID :many
+const listItemsByBoardID = `-- name: ListItemsByBoardID :many
 SELECT 
     i.id,
     i.board_id,
@@ -110,7 +110,7 @@ GROUP BY i.id
 ORDER BY i.created_at
 `
 
-type ListItemsWithTagsByBoardIDRow struct {
+type ListItemsByBoardIDRow struct {
 	ID            int64       `json:"id"`
 	BoardID       int64       `json:"boardId"`
 	Title         string      `json:"title"`
@@ -121,15 +121,15 @@ type ListItemsWithTagsByBoardIDRow struct {
 	Tags          interface{} `json:"tags"`
 }
 
-func (q *Queries) ListItemsWithTagsByBoardID(ctx context.Context, boardID int64) ([]ListItemsWithTagsByBoardIDRow, error) {
-	rows, err := q.db.QueryContext(ctx, listItemsWithTagsByBoardID, boardID)
+func (q *Queries) ListItemsByBoardID(ctx context.Context, boardID int64) ([]ListItemsByBoardIDRow, error) {
+	rows, err := q.db.QueryContext(ctx, listItemsByBoardID, boardID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ListItemsWithTagsByBoardIDRow
+	var items []ListItemsByBoardIDRow
 	for rows.Next() {
-		var i ListItemsWithTagsByBoardIDRow
+		var i ListItemsByBoardIDRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.BoardID,

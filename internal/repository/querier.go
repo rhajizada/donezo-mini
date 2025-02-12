@@ -19,8 +19,8 @@ type Querier interface {
 	GetBoardByID(ctx context.Context, id int64) (Board, error)
 	GetItemByID(ctx context.Context, id int64) (GetItemByIDRow, error)
 	ListBoards(ctx context.Context) ([]Board, error)
+	ListItemsByBoardID(ctx context.Context, boardID int64) ([]ListItemsByBoardIDRow, error)
 	ListItemsByTag(ctx context.Context, tag string) ([]ListItemsByTagRow, error)
-	ListItemsWithTagsByBoardID(ctx context.Context, boardID int64) ([]ListItemsWithTagsByBoardIDRow, error)
 	ListTags(ctx context.Context) ([]string, error)
 	ListTagsByItemID(ctx context.Context, itemID int64) ([]string, error)
 	RemoveTagFromItemByID(ctx context.Context, arg RemoveTagFromItemByIDParams) error

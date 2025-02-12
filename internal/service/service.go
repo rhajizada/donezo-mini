@@ -77,7 +77,7 @@ func (s *Service) DeleteBoard(ctx context.Context, board *Board) error {
 
 // ListItemsByBoard uses the aggregated JSON query and unmarshals the tags.
 func (s *Service) ListItemsByBoard(ctx context.Context, board *Board) (*[]Item, error) {
-	data, err := s.Repo.ListItemsWithTagsByBoardID(ctx, board.ID)
+	data, err := s.Repo.ListItemsByBoardID(ctx, board.ID)
 	if err != nil {
 		return nil, err
 	}
