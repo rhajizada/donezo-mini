@@ -120,6 +120,8 @@ func (m *MenuModel) HandleKeyInput(msg tea.KeyMsg) tea.Cmd {
 		cmd = m.InitRenameBoard()
 	case key.Matches(msg, m.Keys.RefreshList):
 		cmd = m.ListBoards()
+	case key.Matches(msg, m.Keys.Copy):
+		cmd = m.Copy()
 	}
 	return cmd
 }

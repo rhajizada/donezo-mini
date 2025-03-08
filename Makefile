@@ -1,7 +1,7 @@
 .PHONY: build
 ## build: Compile the executables
 build:
-	@go build -o bin/donezo .
+	go build -ldflags="-s -w -X main.Version=$$(git rev-parse --short HEAD)" -o bin/donezo
 
 
 

@@ -1,13 +1,12 @@
-package items
+package itemsbytag
 
 type InputState uint8
 
 const (
 	DefaultState InputState = iota
-	CreateItemNameState
-	CreateItemDescState
 	RenameItemNameState
 	RenameItemDescState
+	UpdateTagsState
 )
 
 type InputContext struct {

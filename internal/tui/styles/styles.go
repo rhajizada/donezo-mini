@@ -14,4 +14,9 @@ var (
 
 	Item = lipgloss.NewStyle().
 		Padding(0, 0)
+
+	Footer = lipgloss.NewStyle().
+		Margin(0, 2).
+		Bold(true).
+		Foreground(lipgloss.Color("#7D56F4"))
 )

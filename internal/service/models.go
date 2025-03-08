@@ -10,4 +10,5 @@ type Board struct {
 
 type Item struct {
 	repository.Item
+	Tags []string
 }

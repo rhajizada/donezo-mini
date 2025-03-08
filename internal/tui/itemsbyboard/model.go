@@ -1,45 +1,47 @@
-package items
+package itemsbyboard
 
 import (
 	"context"
 
-	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/rhajizada/donezo-mini/internal/service"
+	"github.com/rhajizada/donezo-mini/internal/tui/boards"
+	"github.com/rhajizada/donezo-mini/internal/tui/itemlist"
 )
 
-type ItemMenuModel struct {
+type MenuModel struct {
 	ctx     context.Context
-	Parent  *service.Board
-	List    list.Model
+	Parent  *boards.MenuModel
+	List    itemlist.Model
 	Input   textinput.Model
 	Keys    *Keymap
 	Context *InputContext
 	Service *service.Service
 }
 
-func (m ItemMenuModel) Init() tea.Cmd {
+func (m MenuModel) Init() tea.Cmd {
 	return m.ListItems()
 }
 
-func NewModel(ctx context.Context, service *service.Service, board *service.Board) ItemMenuModel {
-	list := list.New(
-		[]list.Item{},
+func New(ctx context.Context, service *service.Service, parent *boards.MenuModel) MenuModel {
+	list := itemlist.New(
+		[]itemlist.Item{},
 		NewDelegate(),
 		0,
 		0,
 	)
+	parentItem := parent.List.SelectedItem().(boards.Item)
 	input := textinput.New()
 	keymap := NewKeymap()
 	inputContext := NewInputContext()
-	list.Title = board.Name
+	list.Title = parentItem.Board.Name
 	list.AdditionalShortHelpKeys = keymap.ShortHelp
 	list.AdditionalFullHelpKeys = keymap.FullHelp
 
-	return ItemMenuModel{
+	return MenuModel{
 		ctx:     ctx,
-		Parent:  board,
+		Parent:  parent,
 		List:    list,
 		Input:   input,
 		Keys:    keymap,

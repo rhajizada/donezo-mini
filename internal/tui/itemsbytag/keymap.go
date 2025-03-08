@@ -1,12 +1,12 @@
-package items
+package itemsbytag
 
 import "github.com/charmbracelet/bubbles/key"
 
 type Keymap struct {
 	Back           key.Binding
-	CreateItem     key.Binding
 	DeleteItem     key.Binding
 	RenameItem     key.Binding
+	UpdateTags     key.Binding
 	RefreshList    key.Binding
 	ToggleComplete key.Binding
 	NextBoard      key.Binding
@@ -19,10 +19,6 @@ func NewKeymap() *Keymap {
 			key.WithKeys("backspace"),
 			key.WithHelp("backspace", "back"),
 		),
-		CreateItem: key.NewBinding(
-			key.WithKeys("a"),
-			key.WithHelp("a", "create item"),
-		),
 		DeleteItem: key.NewBinding(
 			key.WithKeys("d"),
 			key.WithHelp("d", "delete item"),
@@ -30,6 +26,10 @@ func NewKeymap() *Keymap {
 		RenameItem: key.NewBinding(
 			key.WithKeys("r"),
 			key.WithHelp("r", "rename item"),
+		),
+		UpdateTags: key.NewBinding(
+			key.WithKeys("t"),
+			key.WithHelp("t", "update tags"),
 		),
 		RefreshList: key.NewBinding(
 			key.WithKeys("R"),
@@ -53,16 +53,16 @@ func NewKeymap() *Keymap {
 func (km Keymap) ShortHelp() []key.Binding {
 	bindings := []key.Binding{}
 	bindings = append(bindings, km.Back)
-	bindings = append(bindings, km.CreateItem)
+	bindings = append(bindings, km.UpdateTags)
 	return bindings
 }
 
 func (km Keymap) FullHelp() []key.Binding {
 	bindings := []key.Binding{}
 	bindings = append(bindings, km.Back)
-	bindings = append(bindings, km.CreateItem)
 	bindings = append(bindings, km.DeleteItem)
 	bindings = append(bindings, km.RenameItem)
+	bindings = append(bindings, km.UpdateTags)
 	bindings = append(bindings, km.RefreshList)
 	bindings = append(bindings, km.ToggleComplete)
 	bindings = append(bindings, km.NextBoard)

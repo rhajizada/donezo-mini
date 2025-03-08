@@ -9,14 +9,21 @@ import (
 )
 
 type Querier interface {
+	AddTagToItemByID(ctx context.Context, arg AddTagToItemByIDParams) error
+	CountItemsByTag(ctx context.Context, tag string) (int64, error)
 	CreateBoard(ctx context.Context, name string) (Board, error)
 	CreateItem(ctx context.Context, arg CreateItemParams) (Item, error)
 	DeleteBoardByID(ctx context.Context, id int64) error
 	DeleteItemByID(ctx context.Context, id int64) error
+	DeleteTag(ctx context.Context, tag string) error
 	GetBoardByID(ctx context.Context, id int64) (Board, error)
-	GetItemByID(ctx context.Context, id int64) (Item, error)
+	GetItemByID(ctx context.Context, id int64) (GetItemByIDRow, error)
 	ListBoards(ctx context.Context) ([]Board, error)
-	ListItemsByBoardID(ctx context.Context, boardID int64) ([]Item, error)
+	ListItemsByBoardID(ctx context.Context, boardID int64) ([]ListItemsByBoardIDRow, error)
+	ListItemsByTag(ctx context.Context, tag string) ([]ListItemsByTagRow, error)
+	ListTags(ctx context.Context) ([]string, error)
+	ListTagsByItemID(ctx context.Context, itemID int64) ([]string, error)
+	RemoveTagFromItemByID(ctx context.Context, arg RemoveTagFromItemByIDParams) error
 	UpdateBoardByID(ctx context.Context, arg UpdateBoardByIDParams) (Board, error)
 	UpdateItemByID(ctx context.Context, arg UpdateItemByIDParams) (Item, error)
 }

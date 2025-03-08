@@ -1,10 +1,10 @@
-package items
+package itemsbytag
 
 import (
 	"github.com/rhajizada/donezo-mini/internal/tui/styles"
 )
 
-func (m ItemMenuModel) View() string {
+func (m MenuModel) View() string {
 	if m.Context.State != DefaultState {
 		return styles.App.Render(m.Input.View())
 	}

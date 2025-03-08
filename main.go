@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"embed"
+	"flag"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -12,6 +14,7 @@ import (
 	"github.com/rhajizada/donezo-mini/internal/repository"
 	"github.com/rhajizada/donezo-mini/internal/service"
 	"github.com/rhajizada/donezo-mini/internal/tui/app"
+	"golang.design/x/clipboard"
 
 	tea "github.com/charmbracelet/bubbletea"
 	_ "github.com/mattn/go-sqlite3"
@@ -19,15 +22,32 @@ import (
 
 //go:embed data/sql/migrations/*.sql
 var migrations embed.FS
+var Version = "dev"
 
 func main() {
+	versionFlag := flag.Bool("version", false, "Print version information and exit")
+	flag.Parse()
+
+	// If the version flag is provided, print version info and exit.
+	if *versionFlag {
+		fmt.Printf("donezo %s\n", Version)
+		os.Exit(0)
+	}
+	err := clipboard.Init()
+	if err != nil {
+		log.Panicf("unable to access system clipboard: %v", err)
+	}
+
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		log.Panicf("unable to determine user home directory: %v", err)
 	}
 	donezoDir := filepath.Join(homeDir, ".donezo")
 	if _, err = os.Stat(donezoDir); os.IsNotExist(err) {
-		os.Mkdir(donezoDir, 0700)
+		err = os.Mkdir(donezoDir, 0700)
+		if err != nil {
+			log.Panicf("failed to create directory %s: %v", donezoDir, err)
+		}
 	}
 
 	dbPath := filepath.Join(donezoDir, "data.db")
@@ -56,7 +76,7 @@ func main() {
 	s := service.New(r)
 	ctx := context.Background()
 
-	m := app.NewModel(ctx, s)
+	m := app.New(ctx, s)
 	p := tea.NewProgram(m, tea.WithAltScreen())
 
 	if _, err := p.Run(); err != nil {

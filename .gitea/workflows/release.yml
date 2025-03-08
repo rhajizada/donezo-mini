@@ -1,0 +1,39 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          check-latest: true
+      - name: Set environment
+        run: |
+          version="${{ github.ref_name }}"
+          version="${version#v}"
+          echo "version=$version" >> $GITEA_ENV
+      - name: Build (Linux)
+        run: |
+          go build -ldflags="-s -w -X 'main.Version=$version'" -o bin/donezo-${version}-linux-amd64
+      - name: Build (Windows)
+        run: |
+          GOOS=windows GOARCH=amd64 go build -ldflags="-s -w -X 'main.Version=$version'" -o bin/donezo-${version}-windows-amd64.exe
+      - name: Build for Darwin
+        run: |
+          GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -X 'main.Version=$version'" -o bin/donezo-${version}-darwin-arm64
+      - name: Upload
+        id: release
+        uses: https://gitea.com/actions/release-action@main
+        with:
+          files: |
+            bin/**
+          api_key: "${{ secrets.RELEASE_TOKEN }}"

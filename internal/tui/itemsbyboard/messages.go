@@ -1,4 +1,4 @@
-package items
+package itemsbyboard
 
 import "github.com/rhajizada/donezo-mini/internal/service"
 
@@ -16,6 +16,11 @@ type CreateItemMsg struct {
 }
 
 type RenameItemMsg struct {
+	Item  *service.Item
+	Error error
+}
+
+type UpdateTagsMsg struct {
 	Item  *service.Item
 	Error error
 }

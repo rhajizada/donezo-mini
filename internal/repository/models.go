@@ -24,3 +24,8 @@ type Item struct {
 	CreatedAt     time.Time `json:"createdAt"`
 	LastUpdatedAt time.Time `json:"lastUpdatedAt"`
 }
+
+type Tag struct {
+	ItemID int64  `json:"itemId"`
+	Tag    string `json:"tag"`
+}

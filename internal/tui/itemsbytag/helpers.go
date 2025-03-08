@@ -1,4 +1,4 @@
-package items
+package itemsbytag
 
 import "strings"
 
@@ -15,8 +15,4 @@ func truncate(s string, max int, ellipsis string) string {
 
 func splitLines(s string) []string {
 	return strings.Split(s, "\n")
-}
-
-func joinLines(lines []string) string {
-	return strings.Join(lines, "\n")
 }
